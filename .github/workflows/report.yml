@@ -1,0 +1,17 @@
+name: Generate scan report
+
+on:
+  push:
+    branches:
+      - "master"
+      - "main"
+  schedule:
+    # Every Thursday, at 8am UTC
+    - cron: '0 08 * * 4'
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: ministryofjustice/opg-repository-scanner@latest
