@@ -41,15 +41,14 @@ func List() []Account {
 		// ORG
 		Account{Id: "311462405659", Name: "ORG", Environment: "Management", Role: "breakglass"},
 		// jenkins
-		Account{Id: "679638075911", Name: "Jenkins", Environment: "Dev", Role: "account-write"},
-		Account{Id: "997462338508", Name: "Jenkins", Environment: "Prod", Role: "account-write"},
+		Account{Id: "679638075911", Name: "Jenkins", Environment: "Dev", Role: "breakglass"},
+		Account{Id: "997462338508", Name: "Jenkins", Environment: "Prod", Role: "breakglass"},
 		// legacy
 		Account{Id: "792093328875", Name: "Refunds", Environment: "LEGACY-Dev", Role: "account-write"},
 		Account{Id: "574983609246", Name: "Refunds", Environment: "LEGACY-Prod", Role: "account-write"},
 		Account{Id: "550790013665", Name: "MakeLPA", Environment: "LEGACY-Prod", Role: "breakglass"},
 
 		Account{Id: "357766484745", Name: "ORG", Environment: "Shared", Role: "account-write"},
-
 	)
 
 	return list
