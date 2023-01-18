@@ -61,15 +61,15 @@ func (c *DateDataType[T]) Get() (interface{}, error) {
 }
 
 // Return if the row is a header
-func (c *DateDataType[T]) IsHeading() bool {
+func (c *DateDataType[T]) GetIsRowAHeader() bool {
 	if c.rowIsHeader != nil {
 		return *c.rowIsHeader
 	}
 	return false
 }
 
-// SetIsHeading sets the flag
-func (c *DateDataType[T]) SetIsHeading(b *bool) {
+// SetIsRowAHeader sets the flag
+func (c *DateDataType[T]) SetIsRowAHeader(b *bool) {
 	c.rowIsHeader = b
 }
 

@@ -90,7 +90,7 @@ func (c *FormulaDataType[T]) Get() (interface{}, error) {
 
 	if len(c.values) > 0 {
 		var i interface{}
-		if c.IsHeading() {
+		if c.GetIsRowAHeader() {
 			i = c.values[0].Label
 		} else {
 			i = c.values[0].Formula
@@ -101,15 +101,15 @@ func (c *FormulaDataType[T]) Get() (interface{}, error) {
 }
 
 // Return if the row is a header
-func (c *FormulaDataType[T]) IsHeading() bool {
+func (c *FormulaDataType[T]) GetIsRowAHeader() bool {
 	if c.rowIsHeader != nil {
 		return *c.rowIsHeader
 	}
 	return false
 }
 
-// SetIsHeading sets the flag
-func (c *FormulaDataType[T]) SetIsHeading(b *bool) {
+// SetIsRowAHeader sets the flag
+func (c *FormulaDataType[T]) SetIsRowAHeader(b *bool) {
 	c.rowIsHeader = b
 }
 

@@ -104,7 +104,7 @@ func TestFormulaDataTypeGet(t *testing.T) {
 	c = FormulaDataType[FormulaData]{}
 	c.Set(FormulaData{Label: "TOTALS", Formula: "=SUM()"})
 	flag := true
-	c.SetIsHeading(&flag)
+	c.SetIsRowAHeader(&flag)
 
 	val, _ = c.Get()
 

@@ -7,7 +7,7 @@ package cell
 // then this will return nil & error as well
 func New(rowIsHeader *bool, values []interface{}) (c CellData, err error) {
 	c, err = FromData(values[0])
-	c.SetIsHeading(rowIsHeader)
+	c.SetIsRowAHeader(rowIsHeader)
 	c.Set(values...)
 
 	return

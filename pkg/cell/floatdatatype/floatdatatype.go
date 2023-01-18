@@ -72,15 +72,15 @@ func (c *FloatDataType[T]) Get() (interface{}, error) {
 }
 
 // Return if the row is a header
-func (c *FloatDataType[T]) IsHeading() bool {
+func (c *FloatDataType[T]) GetIsRowAHeader() bool {
 	if c.rowIsHeader != nil {
 		return *c.rowIsHeader
 	}
 	return false
 }
 
-// SetIsHeading sets the flag
-func (c *FloatDataType[T]) SetIsHeading(b *bool) {
+// SetIsRowAHeader sets the flag
+func (c *FloatDataType[T]) SetIsRowAHeader(b *bool) {
 	c.rowIsHeader = b
 }
 
