@@ -6,7 +6,10 @@ import (
 	"strconv"
 )
 
-type FloatDataType[T float64 | float32 | int] struct{ values []float64 }
+type FloatDataType[T float64 | float32 | int] struct {
+	RowIsHeader *bool
+	values      []float64
+}
 
 // Parse checks the v.(type) of the interface to determine how to
 // convert the data in to a float. By default it assumes a string.
@@ -66,6 +69,14 @@ func (c *FloatDataType[T]) Get() (interface{}, error) {
 		sum += v
 	}
 	return sum, nil
+}
+
+// Return if the row is a header
+func (c *FloatDataType[T]) IsHeading() bool {
+	if c.RowIsHeader != nil {
+		return *c.RowIsHeader
+	}
+	return false
 }
 
 // Type returns this cells structure type, so you should get a pointer

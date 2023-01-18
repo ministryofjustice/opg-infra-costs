@@ -7,7 +7,10 @@ import (
 	"time"
 )
 
-type DateDataType[T string] struct{ values []string }
+type DateDataType[T string] struct {
+	RowIsHeader *bool
+	values      []string
+}
 
 var dateFormat = formats.DATES["ym"]
 
@@ -55,6 +58,14 @@ func (c *DateDataType[T]) Get() (interface{}, error) {
 		return c.values[0], nil
 	}
 	return nil, nil
+}
+
+// Return if the row is a header
+func (c *DateDataType[T]) IsHeading() bool {
+	if c.RowIsHeader != nil {
+		return *c.RowIsHeader
+	}
+	return false
 }
 
 // Type returns the full type of c, so should

@@ -87,6 +87,7 @@ func TestFormulaDataTypeGetAll(t *testing.T) {
 }
 
 func TestFormulaDataTypeGet(t *testing.T) {
+	// these are body rows, so should return formula
 	c := FormulaDataType[FormulaData]{}
 	c.Set(
 		FormulaData{},
@@ -97,6 +98,16 @@ func TestFormulaDataTypeGet(t *testing.T) {
 
 	val, _ := c.Get()
 	if val.(string) != "=SUMA()" {
+		t.Errorf("expected Get to return matching formula, recieved: [%v]", val)
+	}
+
+	c = FormulaDataType[FormulaData]{}
+	c.Set(FormulaData{Label: "TOTALS", Formula: "=SUM()"})
+	flag := true
+	c.RowIsHeader = &flag
+	val, _ = c.Get()
+
+	if val.(string) != "TOTALS" {
 		t.Errorf("expected Get to return matching formula, recieved: [%v]", val)
 	}
 

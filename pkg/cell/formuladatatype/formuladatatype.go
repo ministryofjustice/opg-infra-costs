@@ -16,7 +16,10 @@ type FormulaData struct {
 	Formula string // FormulaFormat contains
 }
 
-type FormulaDataType[T FormulaData | string | []byte] struct{ values []FormulaData }
+type FormulaDataType[T FormulaData | string | []byte] struct {
+	values      []FormulaData
+	RowIsHeader *bool
+}
 
 // validateFormulaData checks if the FormulaData casted version of
 // v has a Label & Formula property set with a length > 0 (ie not empty)
@@ -84,12 +87,25 @@ func (c *FormulaDataType[T]) GetAll() ([]interface{}, error) {
 
 // Get returns the first Formula value and returns it as an interface
 func (c *FormulaDataType[T]) Get() (interface{}, error) {
+
 	if len(c.values) > 0 {
-		//var i interface{}
-		var i interface{} = c.values[0].Formula
+		var i interface{}
+		if c.IsHeading() {
+			i = c.values[0].Label
+		} else {
+			i = c.values[0].Formula
+		}
 		return i, nil
 	}
 	return nil, nil
+}
+
+// Return if the row is a header
+func (c *FormulaDataType[T]) IsHeading() bool {
+	if c.RowIsHeader != nil {
+		return *c.RowIsHeader
+	}
+	return false
 }
 
 // Type returns the full type of c, so should
