@@ -8,7 +8,7 @@ import (
 )
 
 type DateDataType[T string] struct {
-	RowIsHeader *bool
+	rowIsHeader *bool
 	values      []string
 }
 
@@ -62,10 +62,15 @@ func (c *DateDataType[T]) Get() (interface{}, error) {
 
 // Return if the row is a header
 func (c *DateDataType[T]) IsHeading() bool {
-	if c.RowIsHeader != nil {
-		return *c.RowIsHeader
+	if c.rowIsHeader != nil {
+		return *c.rowIsHeader
 	}
 	return false
+}
+
+// SetIsHeading sets the flag
+func (c *DateDataType[T]) SetIsHeading(b *bool) {
+	c.rowIsHeader = b
 }
 
 // Type returns the full type of c, so should

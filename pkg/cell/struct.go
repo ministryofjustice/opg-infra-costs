@@ -9,5 +9,6 @@ type CellData interface {
 	GetAll() ([]interface{}, error)
 	Type() reflect.Type
 	TType() reflect.Type
+	SetIsHeading(b *bool)
 	IsHeading() bool
 }

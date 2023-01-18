@@ -7,7 +7,7 @@ import (
 )
 
 type FloatDataType[T float64 | float32 | int] struct {
-	RowIsHeader *bool
+	rowIsHeader *bool
 	values      []float64
 }
 
@@ -73,10 +73,15 @@ func (c *FloatDataType[T]) Get() (interface{}, error) {
 
 // Return if the row is a header
 func (c *FloatDataType[T]) IsHeading() bool {
-	if c.RowIsHeader != nil {
-		return *c.RowIsHeader
+	if c.rowIsHeader != nil {
+		return *c.rowIsHeader
 	}
 	return false
+}
+
+// SetIsHeading sets the flag
+func (c *FloatDataType[T]) SetIsHeading(b *bool) {
+	c.rowIsHeader = b
 }
 
 // Type returns this cells structure type, so you should get a pointer
