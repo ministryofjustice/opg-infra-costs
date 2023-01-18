@@ -9,7 +9,7 @@ import (
 	"github.com/k0kubun/pp"
 )
 
-func TestSetCells(t *testing.T) {
+func TestSetAndGetCells(t *testing.T) {
 	r := Row{}
 
 	r.SetVisible(true)
@@ -65,9 +65,5 @@ func TestSetCells(t *testing.T) {
 	if err == nil {
 		t.Errorf("expected SetCells to return an error for unsupported type, recieved [%v]", err)
 	}
-
-}
-
-func TestGetCells(t *testing.T) {
 
 }
