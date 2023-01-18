@@ -39,4 +39,10 @@ func TestCellDataFromData(t *testing.T) {
 		t.Errorf("expected an error for unsupported type [bool], actual [%v] [%T]", err, c)
 	}
 
+	//
+	c, err = FromData("generic string header")
+	if err != nil {
+		t.Errorf("unexpected error for [string], actual [%v] [%T]", err, c)
+	}
+
 }
