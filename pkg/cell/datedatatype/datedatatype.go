@@ -54,7 +54,7 @@ func (c *DateDataType[T]) Get() (interface{}, error) {
 	if len(c.values) > 0 {
 		return c.values[0], nil
 	}
-	return "", nil
+	return nil, nil
 }
 
 // Type returns the full type of c, so should

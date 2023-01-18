@@ -40,3 +40,64 @@ func TestFormulaDataTypeParse(t *testing.T) {
 	}
 
 }
+
+func TestFormulaDataTypeSet(t *testing.T) {
+	var err error
+
+	// test sets with the struct
+	c := FormulaDataType[FormulaData]{}
+	err = c.Set(
+		FormulaData{Label: "A", Formula: "=SUM()"},
+		FormulaData{Label: "B", Formula: "=SUM()"},
+	)
+	if err != nil {
+		t.Errorf("unexpected error returned by Set: [%v]", err)
+	}
+
+	// this should throw an error as it should have a Label
+	err = c.Set(
+		FormulaData{Formula: "=SUM()"},
+	)
+	if err == nil {
+		t.Errorf("expected an error to be returned by Set, recieved: [%v]", err)
+	}
+
+	err = c.Set(
+		FormulaData{Label: "A", Formula: ""},
+	)
+	if err == nil {
+		t.Errorf("expected an error to be returned by Set, recieved: [%v]", err)
+	}
+
+}
+
+func TestFormulaDataTypeGetAll(t *testing.T) {
+	c := FormulaDataType[FormulaData]{}
+	c.Set(
+		FormulaData{},
+		FormulaData{Label: "1"},
+		FormulaData{Label: "A", Formula: "=SUM()"},
+		FormulaData{Label: "B", Formula: "=SUM()"},
+	)
+
+	vals, _ := c.GetAll()
+	if len(vals) != 2 {
+		t.Errorf("expected GetAll to only return 2 items, actual [%v]", len(vals))
+	}
+}
+
+func TestFormulaDataTypeGet(t *testing.T) {
+	c := FormulaDataType[FormulaData]{}
+	c.Set(
+		FormulaData{},
+		FormulaData{Label: "1"},
+		FormulaData{Label: "A", Formula: "=SUMA()"},
+		FormulaData{Label: "B", Formula: "=SUMB()"},
+	)
+
+	val, _ := c.Get()
+	if val.(string) != "=SUMA()" {
+		t.Errorf("expected Get to return matching formula, recieved: [%v]", val)
+	}
+
+}

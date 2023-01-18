@@ -114,7 +114,7 @@ func TestDateDataTypeGet(t *testing.T) {
 	if e != nil {
 		t.Errorf("expected Get to return without error even when empty, recieved [%v]", e)
 	}
-	if v != "" {
+	if v != nil {
 		t.Errorf("expected Get to return empty string, recieved [%v]", v)
 	}
 

@@ -3,6 +3,7 @@ package formuladatatype
 import (
 	"encoding/json"
 	"fmt"
+	"reflect"
 )
 
 // FormulaData struct handles how we return data for cells
@@ -15,59 +16,91 @@ type FormulaData struct {
 	Formula string // FormulaFormat contains
 }
 
-type FormulaDataType[T FormulaData | string | []byte] struct{ values []string }
+type FormulaDataType[T FormulaData | string | []byte] struct{ values []FormulaData }
 
-// Parse checks the string if its FormulaData struct or a Json string
+// validateFormulaData checks if the FormulaData casted version of
+// v has a Label & Formula property set with a length > 0 (ie not empty)
+// If its empty, an error is returned
+func validateFormulaData(v interface{}) (interface{}, error) {
+	if f := v.(FormulaData); len(f.Label) > 0 && len(f.Formula) > 0 {
+		return f, nil
+	}
+	return nil, fmt.Errorf("failed to validate [%v] as FormulaData", v)
+}
+
+// Parse checks the v interface{} type to determine how to convert.
+//   - For a string or []byte the data it tries to unmarshall, presuming
+//     a json string version of the struct
+//   - If the type matches the FormulaData struct then it checks to
+//     ensure properties are set
+//
+// If a type match is not found, an error is returned
 func (c *FormulaDataType[T]) Parse(v interface{}) (interface{}, error) {
+	var obj FormulaData
 
 	switch v.(type) {
 	case FormulaData:
-		if f := v.(FormulaData); len(f.Label) > 0 && len(f.Formula) > 0 {
-			return f, nil
-		}
+		return validateFormulaData(v)
 	case []byte:
 		// check if its a json encoded string
-		var obj FormulaData
 		if err := json.Unmarshal(v.([]byte), &obj); err == nil {
-			return obj, nil
+			return validateFormulaData(obj)
 		}
 	case string:
 		// check if its a json encoded string
-		var obj FormulaData
 		if err := json.Unmarshal([]byte(v.(string)), &obj); err == nil {
-			return obj, nil
+			return validateFormulaData(obj)
 		}
 	}
 
 	return nil, fmt.Errorf("failed to parse [%v] to FormulaData", v)
 }
 
-// func (c *FormulaDataType[T]) Set(values ...interface{}) error {
-// 	var err error
-// 	// for _, v := range values {
-// 	// 	if val, parseErr := c.Parse(v); parseErr == nil {
-// 	// 		c.values = append(c.values, val.(string))
-// 	// 	} else {
-// 	// 		err = fmt.Errorf("failed to convert [%v] to a date format", v)
-// 	// 	}
-// 	// }
-// 	return err
-// }
+// Set takes the incoming values, checks that they Parse correctly
+// and those are do are added (as FormulaData) to the `.values` slice.
+// If any fail, they are skipped & the last failures error message is
+// returned.
+func (c *FormulaDataType[T]) Set(values ...interface{}) error {
+	var err error
+	for _, v := range values {
+		if val, parseErr := c.Parse(v); parseErr == nil {
+			c.values = append(c.values, val.(FormulaData))
+		} else {
+			err = fmt.Errorf("failed to convert [%v] to a FormulaData", v)
+		}
+	}
+	return err
+}
 
-// // GetAll iterates over all the current `.values` and appends
-// // them as an interface{} to a slice which is then returned
-// func (c *FormulaDataType[T]) GetAll() ([]interface{}, error) {
-// 	interfaces := []interface{}{}
-// 	for _, v := range c.values {
-// 		interfaces = append(interfaces, v)
-// 	}
-// 	return interfaces, nil
-// }
+// GetAll iterates over all the current `.values` and appends
+// them as an interface{} to a slice which is then returned
+func (c *FormulaDataType[T]) GetAll() ([]interface{}, error) {
+	interfaces := []interface{}{}
+	for _, v := range c.values {
+		interfaces = append(interfaces, v)
+	}
+	return interfaces, nil
+}
 
-// // Get returns the first entry of `.values` only
-// func (c *FormulaDataType[T]) Get() (interface{}, error) {
-// 	if len(c.values) > 0 {
-// 		return c.values[0], nil
-// 	}
-// 	return "", nil
-// }
+// Get returns the first Formula value and returns it as an interface
+func (c *FormulaDataType[T]) Get() (interface{}, error) {
+	if len(c.values) > 0 {
+		//var i interface{}
+		var i interface{} = c.values[0].Formula
+		return i, nil
+	}
+	return nil, nil
+}
+
+// Type returns the full type of c, so should
+// be a pointer like *DateDataType[string]
+func (c *FormulaDataType[T]) Type() reflect.Type {
+	return reflect.TypeOf(c)
+}
+
+// TType returns just the type of T, so for this
+// struct it would be string
+func (c *FormulaDataType[T]) TType() reflect.Type {
+	var t T
+	return reflect.TypeOf(t)
+}
