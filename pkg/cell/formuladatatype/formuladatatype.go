@@ -18,7 +18,7 @@ type FormulaData struct {
 
 type FormulaDataType[T FormulaData | string | []byte] struct {
 	values      []FormulaData
-	rowIsHeader *bool
+	rowIsHeader bool
 }
 
 // validateFormulaData checks if the FormulaData casted version of
@@ -102,14 +102,12 @@ func (c *FormulaDataType[T]) Get() (interface{}, error) {
 
 // Return if the row is a header
 func (c *FormulaDataType[T]) GetIsRowAHeader() bool {
-	if c.rowIsHeader != nil {
-		return *c.rowIsHeader
-	}
-	return false
+	return c.rowIsHeader
+
 }
 
 // SetIsRowAHeader sets the flag
-func (c *FormulaDataType[T]) SetIsRowAHeader(b *bool) {
+func (c *FormulaDataType[T]) SetIsRowAHeader(b bool) {
 	c.rowIsHeader = b
 }
 

@@ -1,6 +1,7 @@
 package cell
 
 import (
+	"fmt"
 	"opg-infra-costs/pkg/cell/datedatatype"
 	"opg-infra-costs/pkg/cell/floatdatatype"
 	"opg-infra-costs/pkg/cell/formuladatatype"
@@ -30,6 +31,8 @@ func FromData(data interface{}) (CellData, error) {
 		c = &floatdatatype.FloatDataType[int]{}
 	} else if IsA[*datedatatype.DateDataType[string]](data) {
 		c = &datedatatype.DateDataType[string]{}
+	} else {
+		err = fmt.Errorf("failed to find matching cell data type for [%v]", data)
 	}
 
 	return c, err

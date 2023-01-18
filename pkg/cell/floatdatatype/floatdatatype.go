@@ -2,12 +2,13 @@ package floatdatatype
 
 import (
 	"fmt"
+	"math"
 	"reflect"
 	"strconv"
 )
 
 type FloatDataType[T float64 | float32 | int] struct {
-	rowIsHeader *bool
+	rowIsHeader bool
 	values      []float64
 }
 
@@ -25,6 +26,8 @@ func (c *FloatDataType[T]) Parse(v interface{}) (interface{}, error) {
 		val = float64(v.(float32))
 	case float64:
 		val = v.(float64)
+	case bool:
+		err = fmt.Errorf("unsupported type: bool")
 	default:
 		val, err = strconv.ParseFloat(v.(string), 64)
 	}
@@ -64,23 +67,27 @@ func (c *FloatDataType[T]) GetAll() ([]interface{}, error) {
 
 // Get returns the total value of all stored `.values`
 func (c *FloatDataType[T]) Get() (interface{}, error) {
-	sum := 0.0
+	var sum float64 = 0.0
 	for _, v := range c.values {
 		sum += v
 	}
+	// rounding
+	// 4 decimal places on the floats
+	unit := 0.0001
+	sum = math.Round(sum/unit) * unit
+
 	return sum, nil
 }
 
 // Return if the row is a header
 func (c *FloatDataType[T]) GetIsRowAHeader() bool {
-	if c.rowIsHeader != nil {
-		return *c.rowIsHeader
-	}
-	return false
+
+	return c.rowIsHeader
+
 }
 
 // SetIsRowAHeader sets the flag
-func (c *FloatDataType[T]) SetIsRowAHeader(b *bool) {
+func (c *FloatDataType[T]) SetIsRowAHeader(b bool) {
 	c.rowIsHeader = b
 }
 

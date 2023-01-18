@@ -5,10 +5,18 @@ package cell
 //
 // If FromData does not match the type of the cell
 // then this will return nil & error as well
-func New(rowIsHeader *bool, values []interface{}) (c CellData, err error) {
+func New(
+	rowIsHeader bool,
+	values []interface{},
+) (c CellData, err error) {
+
 	c, err = FromData(values[0])
-	c.SetIsRowAHeader(rowIsHeader)
-	c.Set(values...)
+	// if there was no error create the celldata
+	// then set the values
+	if err == nil {
+		c.SetIsRowAHeader(rowIsHeader)
+		err = c.Set(values...)
+	}
 
 	return
 }

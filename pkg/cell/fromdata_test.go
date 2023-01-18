@@ -33,4 +33,10 @@ func TestCellDataFromData(t *testing.T) {
 		t.Errorf("types do not match, expected [%v], actual [%v]", ty, fl.Type())
 	}
 
+	// fail with unsupport type
+	c, err = FromData(true)
+	if err == nil {
+		t.Errorf("expected an error for unsupported type [bool], actual [%v] [%T]", err, c)
+	}
+
 }

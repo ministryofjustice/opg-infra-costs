@@ -8,7 +8,7 @@ import (
 )
 
 type DateDataType[T string] struct {
-	rowIsHeader *bool
+	rowIsHeader bool
 	values      []string
 }
 
@@ -19,9 +19,14 @@ var dateFormat = formats.DATES["ym"]
 // If string -> time conversion fails an error is returned with an empty
 // string
 func (c *DateDataType[T]) Parse(v interface{}) (interface{}, error) {
-	if val, err := time.Parse(dateFormat, v.(string)); err == nil {
-		return val.Format(dateFormat), nil
+
+	switch v.(type) {
+	case string:
+		if val, err := time.Parse(dateFormat, v.(string)); err == nil {
+			return val.Format(dateFormat), nil
+		}
 	}
+
 	return nil, fmt.Errorf("failed to parse [%v] to a date", v)
 }
 
@@ -62,14 +67,11 @@ func (c *DateDataType[T]) Get() (interface{}, error) {
 
 // Return if the row is a header
 func (c *DateDataType[T]) GetIsRowAHeader() bool {
-	if c.rowIsHeader != nil {
-		return *c.rowIsHeader
-	}
-	return false
+	return c.rowIsHeader
 }
 
 // SetIsRowAHeader sets the flag
-func (c *DateDataType[T]) SetIsRowAHeader(b *bool) {
+func (c *DateDataType[T]) SetIsRowAHeader(b bool) {
 	c.rowIsHeader = b
 }
 

@@ -9,7 +9,7 @@ type CellData interface {
 	Get() (interface{}, error)
 	GetAll() ([]interface{}, error)
 
-	SetIsRowAHeader(b *bool)
+	SetIsRowAHeader(b bool)
 	GetIsRowAHeader() bool
 
 	Type() reflect.Type
