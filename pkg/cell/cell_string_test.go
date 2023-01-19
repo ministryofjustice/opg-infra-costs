@@ -90,8 +90,8 @@ func TestStringDataTypeGet(t *testing.T) {
 	if e != nil {
 		t.Errorf("expected Get to return without error, recieved [%v]", e)
 	}
-	if v != "foo" {
-		t.Errorf("expected get to return the first value passed to set")
+	if v.(StringData).Display != "foo" {
+		t.Errorf("expected get to return the display field of the first value passed to set")
 	}
 
 	c = StringDataType[string]{}
@@ -104,6 +104,15 @@ func TestStringDataTypeGet(t *testing.T) {
 	}
 	if v != nil {
 		t.Errorf("expected Get to return empty string, recieved [%v]", v)
+	}
+
+	c = StringDataType[string]{}
+	// set several
+	c.Set(StringData{Key: "test", Display: "Test"})
+	// get should return just the first
+	v, _ = c.Get()
+	if v.(StringData).Display != "Test" {
+		t.Errorf("expected get to return the Display field, [%v]", v)
 	}
 
 }
