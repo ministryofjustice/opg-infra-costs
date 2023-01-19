@@ -15,22 +15,23 @@ func FromData(data interface{}) (CellInterface, error) {
 	// Most specific to least
 	// -- formula as json
 	// -- formula as FormulaDate
+	// -- string as StringData
 	// -- float
 	// -- float as int
 	// -- date
-	// -- string
+
 	if IsA[*FormulaDataType[string]](data) {
 		c = &FormulaDataType[string]{}
 	} else if IsA[*FormulaDataType[FormulaData]](data) {
 		c = &FormulaDataType[FormulaData]{}
+	} else if IsA[*StringDataType[StringData]](data) {
+		c = &StringDataType[StringData]{}
 	} else if IsA[*FloatDataType[float64]](data) {
 		c = &FloatDataType[float64]{}
 	} else if IsA[*FloatDataType[int]](data) {
 		c = &FloatDataType[int]{}
 	} else if IsA[*DateDataType[string]](data) {
 		c = &DateDataType[string]{}
-	} else if IsA[*StringDataType[string]](data) {
-		c = &StringDataType[string]{}
 	} else {
 		err = fmt.Errorf("failed to find matching cell data type for [%v]", data)
 	}

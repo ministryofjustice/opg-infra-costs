@@ -28,7 +28,7 @@ func (c *FloatDataType[T]) Parse(v interface{}) (interface{}, error) {
 		val = v.(float64)
 	case bool:
 		err = fmt.Errorf("unsupported type: bool")
-	default:
+	case string:
 		val, err = strconv.ParseFloat(v.(string), 64)
 	}
 

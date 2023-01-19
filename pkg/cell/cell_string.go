@@ -1,7 +1,6 @@
 package cell
 
 import (
-	"encoding/json"
 	"fmt"
 	"reflect"
 )
@@ -11,59 +10,25 @@ type StringData struct {
 	Key     string
 }
 
-type StringDataType[T string | StringData] struct {
+type StringDataType[T StringData] struct {
 	rowIsHeader bool
 	values      []StringData
 }
 
-// validateStringData checks if the casted version of
-// v has a Display or Key property set with a length > 0 (ie not empty)
-// If its empty, an error is returned
-func validateStringData(v interface{}) (interface{}, error) {
-	if f := v.(StringData); len(f.Display) > 0 || len(f.Key) > 0 {
-		return f, nil
-	}
-	return nil, fmt.Errorf("failed to validate [%v] as StringData", v)
-}
-
-func validateJsonAsStringData(v interface{}) (interface{}, error) {
-	var obj StringData
-	if err := json.Unmarshal(v.([]byte), &obj); err == nil {
-		return validateFormulaData(obj)
-	}
-	return nil, fmt.Errorf("failed to validate as json [%v] to StringData", v)
-}
-
 // Parse handles string or []byte and returns a string interface from them
-func (c *StringDataType[T]) Parse(v interface{}) (interface{}, error) {
-	var i interface{}
-	var err error
+func (c *StringDataType[T]) Parse(v interface{}) (i interface{}, err error) {
 
 	switch v.(type) {
 	case StringData:
-		return validateStringData(v)
-	case []byte:
-		// check if this is a json string version of StringData
-		i, err = validateJsonAsStringData(v.([]byte))
-		if err == nil {
-			return i, nil
+		if f := v.(StringData); len(f.Display) > 0 || len(f.Key) > 0 {
+			i = f
 		}
-		// otherwise, presume a []byte to string
-		i = string(v.([]byte))
-		return i, nil
-	case string:
-		// check this string for being json, swap to its []byte form
-		i, err = validateJsonAsStringData([]byte(v.(string)))
-		if err == nil {
-			return i, nil
-		}
-		// otherwise, presume string
-		i = v.(string)
-		return i, nil
 	}
 
-	err = fmt.Errorf("failed to parse [%v] to a date", v)
-	return nil, err
+	if i == nil {
+		err = fmt.Errorf("failed to parse [%v] to a stringdata", v)
+	}
+	return i, err
 }
 
 // Set takes a series of interfaces, checks each one (via Parse) and
@@ -75,15 +40,9 @@ func (c *StringDataType[T]) Set(values ...interface{}) error {
 	var err error
 	for _, v := range values {
 		if val, parseErr := c.Parse(v); parseErr == nil {
-			switch val.(type) {
-			case StringData:
-				c.values = append(c.values, val.(StringData))
-			default:
-				c.values = append(c.values, StringData{Display: val.(string)})
-			}
-
+			c.values = append(c.values, val.(StringData))
 		} else {
-			err = fmt.Errorf("failed to convert [%v] to a string format", v)
+			err = fmt.Errorf("failed to convert [%v] to a StringData format", v)
 		}
 	}
 	return err
@@ -99,12 +58,20 @@ func (c *StringDataType[T]) GetAll() ([]interface{}, error) {
 	return interfaces, nil
 }
 
-// Get returns the first entry of `.values` only
+// Get returns the first values Display value
 func (c *StringDataType[T]) Get() (interface{}, error) {
+	var i interface{}
+
 	if len(c.values) > 0 {
-		return c.values[0], nil
+		first := c.values[0]
+		if len(first.Display) > 0 {
+			return first.Display, nil
+		} else {
+			return first.Key, nil
+		}
 	}
-	return nil, nil
+
+	return i, nil
 }
 
 // Return if the row is a header

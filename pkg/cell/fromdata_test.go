@@ -17,7 +17,7 @@ func TestCellInterfaceFromData(t *testing.T) {
 	}
 	ty = reflect.TypeOf(c)
 	if ty != d.Type() {
-		t.Errorf("types do not match, expected [%v], actual [%v]", ty, d.Type())
+		t.Errorf("types do not match, expected [%v], actual [%v]", d.Type(), ty)
 	}
 
 	c, err = FromData("0.00")
@@ -28,7 +28,7 @@ func TestCellInterfaceFromData(t *testing.T) {
 	}
 	ty = reflect.TypeOf(c)
 	if ty != fl.Type() {
-		t.Errorf("types do not match, expected [%v], actual [%v]", ty, fl.Type())
+		t.Errorf("types do not match, expected [%v], actual [%v]", fl.Type(), ty)
 	}
 
 	// fail with unsupport type
@@ -39,7 +39,7 @@ func TestCellInterfaceFromData(t *testing.T) {
 
 	//
 	c, err = FromData("generic string header")
-	if err != nil {
+	if err == nil {
 		t.Errorf("unexpected error for [string], actual [%v] [%T]", err, c)
 	}
 
