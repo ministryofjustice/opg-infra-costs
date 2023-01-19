@@ -8,9 +8,7 @@ import (
 // and uses IsA to determine which CellInterface struct is
 // correct to return
 // If nothing matches, then it returns nil & error
-func FromData(data interface{}) (CellInterface, error) {
-	var err error
-	var c CellInterface
+func FromData(data interface{}) (c CellInterface, err error) {
 
 	// Most specific to least
 	// -- formula as json
@@ -19,7 +17,6 @@ func FromData(data interface{}) (CellInterface, error) {
 	// -- float
 	// -- float as int
 	// -- date
-
 	if IsA[*FormulaDataType[string]](data) {
 		c = &FormulaDataType[string]{}
 	} else if IsA[*FormulaDataType[FormulaData]](data) {
@@ -36,7 +33,7 @@ func FromData(data interface{}) (CellInterface, error) {
 		err = fmt.Errorf("failed to find matching cell data type for [%v]", data)
 	}
 
-	return c, err
+	return
 
 }
 
