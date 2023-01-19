@@ -23,6 +23,7 @@ type RowInterface interface {
 	// }
 	// for string columns
 	SetCells(data [][]interface{}) error
+	SetDefinedCells(data []cell.CellInterface) error
 	GetCells() ([]cell.CellInterface, error)
 }
 

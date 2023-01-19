@@ -30,3 +30,11 @@ func (r *Row) SetCells(dataset [][]interface{}) (err error) {
 	}
 	return
 }
+
+// SetDefinedCells takes already generated CellInterfaces and appends them
+func (r *Row) SetDefinedCells(dataset []cell.CellInterface) (err error) {
+	for _, c := range dataset {
+		r.cells = append(r.cells, c)
+	}
+	return
+}
