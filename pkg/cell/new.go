@@ -20,3 +20,13 @@ func New(
 
 	return
 }
+
+func NewColumnHeader(
+	values []interface{},
+) (c ColumnHeadDataType[ColumnHeadData], err error) {
+	c = ColumnHeadDataType[ColumnHeadData]{}
+	c.SetIsRowAHeader(true)
+	err = c.Set(values...)
+
+	return
+}

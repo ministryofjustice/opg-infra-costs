@@ -100,3 +100,11 @@ func (c *ColumnHeadDataType[T]) TType() reflect.Type {
 func (c *ColumnHeadDataType[T]) AcceptsValuesOf(t reflect.Type) bool {
 	return t == c.TType()
 }
+
+// -- extra
+func (c *ColumnHeadDataType[T]) Key() string {
+	if len(c.values) > 0 {
+		return c.values[0].Key
+	}
+	return ""
+}
