@@ -1,4 +1,4 @@
-package formuladatatype
+package cell
 
 import (
 	"encoding/json"

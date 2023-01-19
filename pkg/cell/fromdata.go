@@ -2,10 +2,6 @@ package cell
 
 import (
 	"fmt"
-	"opg-infra-costs/pkg/cell/datedatatype"
-	"opg-infra-costs/pkg/cell/floatdatatype"
-	"opg-infra-costs/pkg/cell/formuladatatype"
-	"opg-infra-costs/pkg/cell/stringdatatype"
 )
 
 // FromData inspects the data passed as an interface
@@ -23,18 +19,18 @@ func FromData(data interface{}) (CellInterface, error) {
 	// -- float as int
 	// -- date
 	// -- string
-	if IsA[*formuladatatype.FormulaDataType[string]](data) {
-		c = &formuladatatype.FormulaDataType[string]{}
-	} else if IsA[*formuladatatype.FormulaDataType[formuladatatype.FormulaData]](data) {
-		c = &formuladatatype.FormulaDataType[formuladatatype.FormulaData]{}
-	} else if IsA[*floatdatatype.FloatDataType[float64]](data) {
-		c = &floatdatatype.FloatDataType[float64]{}
-	} else if IsA[*floatdatatype.FloatDataType[int]](data) {
-		c = &floatdatatype.FloatDataType[int]{}
-	} else if IsA[*datedatatype.DateDataType[string]](data) {
-		c = &datedatatype.DateDataType[string]{}
-	} else if IsA[*stringdatatype.StringDataType[string]](data) {
-		c = &stringdatatype.StringDataType[string]{}
+	if IsA[*FormulaDataType[string]](data) {
+		c = &FormulaDataType[string]{}
+	} else if IsA[*FormulaDataType[FormulaData]](data) {
+		c = &FormulaDataType[FormulaData]{}
+	} else if IsA[*FloatDataType[float64]](data) {
+		c = &FloatDataType[float64]{}
+	} else if IsA[*FloatDataType[int]](data) {
+		c = &FloatDataType[int]{}
+	} else if IsA[*DateDataType[string]](data) {
+		c = &DateDataType[string]{}
+	} else if IsA[*StringDataType[string]](data) {
+		c = &StringDataType[string]{}
 	} else {
 		err = fmt.Errorf("failed to find matching cell data type for [%v]", data)
 	}

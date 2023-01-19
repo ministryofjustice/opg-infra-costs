@@ -1,8 +1,6 @@
 package cell
 
 import (
-	"opg-infra-costs/pkg/cell/datedatatype"
-	"opg-infra-costs/pkg/cell/floatdatatype"
 	"reflect"
 	"testing"
 )
@@ -12,7 +10,7 @@ func TestCellInterfaceFromData(t *testing.T) {
 
 	// this should become a DateDateType
 	c, err := FromData("2022-01")
-	d := &datedatatype.DateDataType[string]{}
+	d := &DateDataType[string]{}
 
 	if err != nil {
 		t.Errorf("unexpected error recieved [%v]", err)
@@ -23,7 +21,7 @@ func TestCellInterfaceFromData(t *testing.T) {
 	}
 
 	c, err = FromData("0.00")
-	fl := &floatdatatype.FloatDataType[float64]{}
+	fl := &FloatDataType[float64]{}
 
 	if err != nil {
 		t.Errorf("unexpected error recieved [%v]", err)

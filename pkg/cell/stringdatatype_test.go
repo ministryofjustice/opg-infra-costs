@@ -1,4 +1,4 @@
-package stringdatatype
+package cell
 
 import (
 	"testing"

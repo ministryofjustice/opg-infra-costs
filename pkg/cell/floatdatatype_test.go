@@ -1,4 +1,4 @@
-package floatdatatype
+package cell
 
 import (
 	"testing"
