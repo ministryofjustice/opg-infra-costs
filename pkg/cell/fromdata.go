@@ -17,6 +17,7 @@ func FromData(data interface{}) (c CellInterface, err error) {
 	// -- float
 	// -- float as int
 	// -- date
+	// -- string catch all
 	if IsA[*FormulaDataType[string]](data) {
 		c = &FormulaDataType[string]{}
 	} else if IsA[*FormulaDataType[FormulaData]](data) {
@@ -29,6 +30,8 @@ func FromData(data interface{}) (c CellInterface, err error) {
 		c = &FloatDataType[int]{}
 	} else if IsA[*DateDataType[string]](data) {
 		c = &DateDataType[string]{}
+	} else if IsA[*StringDataType[string]](data) {
+		c = &StringDataType[string]{}
 	} else {
 		err = fmt.Errorf("failed to find matching cell data type for [%v]", data)
 	}

@@ -39,7 +39,7 @@ func TestCellInterfaceFromData(t *testing.T) {
 
 	//
 	c, err = FromData("generic string header")
-	if err == nil {
+	if err != nil {
 		t.Errorf("unexpected error for [string], actual [%v] [%T]", err, c)
 	}
 
