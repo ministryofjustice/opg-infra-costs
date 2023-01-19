@@ -4,8 +4,8 @@ import "opg-infra-costs/pkg/cell"
 
 // GetCells simply returns the cells internal
 // slice of CellInterface interfaces structs
-func (r *Row) GetCells() []cell.CellInterface {
-	return r.cells
+func (r *Row) GetCells() ([]cell.CellInterface, error) {
+	return r.cells, nil
 }
 
 // SetCells takes a slice of mixed (likely strings)
@@ -15,8 +15,8 @@ func (r *Row) SetCells(dataset [][]interface{}) (err error) {
 	var c cell.CellInterface
 
 	var isThisRowAHeader bool = false
-	if r.GetHeader() {
-		isThisRowAHeader = true
+	if v, err := r.GetHeader(); err == nil {
+		isThisRowAHeader = v
 	}
 
 	for _, values := range dataset {

@@ -3,16 +3,15 @@ package row
 import "opg-infra-costs/pkg/cell"
 
 type RowInterface interface {
-	GetIndex() int
-	SetIndex(i int)
+	SetIndex(i int) error
+	GetIndex() (int, error)
 
-	GetHeader() bool
-	SetHeader(b bool)
+	SetHeader(b bool) error
+	GetHeader() (bool, error)
 
-	GetVisible() bool
-	SetVisible(v bool)
+	SetVisible(v bool) error
+	GetVisible() (bool, error)
 
-	GetCells() []cell.CellInterface
 	// SetCells expects data to be like:
 	// {
 	//		{"0.01"}, {"1.011"}
@@ -23,7 +22,8 @@ type RowInterface interface {
 	//		{"AWS S3"}, {"AWS S3"}
 	// }
 	// for string columns
-	SetCells(data [][]interface{})
+	SetCells(data [][]interface{}) error
+	GetCells() ([]cell.CellInterface, error)
 }
 
 type Row struct {

@@ -28,7 +28,7 @@ func TestSetAndGetCells(t *testing.T) {
 		t.Errorf("expected error from SetCells due to invalid data, recieved [%v]", err)
 	}
 
-	all := r.GetCells()
+	all, _ := r.GetCells()
 	// -1 as there is a failing version in there
 	if len(all) != len(testcells)-1 {
 		t.Errorf("unexpected error, GetCalls should return [%v] items, actual [%v]", len(testcells), len(all))
