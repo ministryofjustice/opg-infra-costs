@@ -12,7 +12,7 @@ type RowData interface {
 	GetVisible() bool
 	SetVisible(v bool)
 
-	GetCells() []cell.CellData
+	GetCells() []cell.CellInterface
 	// SetCells expects data to be like:
 	// {
 	//		{"0.01"}, {"1.011"}
@@ -30,5 +30,5 @@ type Row struct {
 	index   int
 	visible bool
 	header  bool
-	cells   []cell.CellData
+	cells   []cell.CellInterface
 }

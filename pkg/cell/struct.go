@@ -2,7 +2,7 @@ package cell
 
 import "reflect"
 
-type CellData interface {
+type CellInterface interface {
 	Parse(v interface{}) (interface{}, error)
 
 	Set(values ...interface{}) error

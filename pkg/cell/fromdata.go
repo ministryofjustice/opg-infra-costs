@@ -9,12 +9,12 @@ import (
 )
 
 // FromData inspects the data passed as an interface
-// and uses IsA to determine which CellData struct is
+// and uses IsA to determine which CellInterface struct is
 // correct to return
 // If nothing matches, then it returns nil & error
-func FromData(data interface{}) (CellData, error) {
+func FromData(data interface{}) (CellInterface, error) {
 	var err error
-	var c CellData
+	var c CellInterface
 
 	// Most specific to least
 	// -- formula as json
@@ -45,7 +45,7 @@ func FromData(data interface{}) (CellData, error) {
 
 // IsA uses the Parse method on T to decide if
 // data is of that type
-func IsA[T CellData](data interface{}) bool {
+func IsA[T CellInterface](data interface{}) bool {
 	var t T
 	if _, err := t.Parse(data); err == nil {
 		return true

@@ -5,16 +5,14 @@ import (
 	"opg-infra-costs/pkg/cell/floatdatatype"
 	"opg-infra-costs/pkg/cell/formuladatatype"
 	"testing"
-
-	"github.com/k0kubun/pp"
 )
 
 func TestSetAndGetCells(t *testing.T) {
 	r := Row{}
 
 	r.SetVisible(true)
-	r.SetHeader(false)
-	r.SetIndex(2)
+	r.SetHeader(true)
+	r.SetIndex(1)
 
 	testcells := [][]interface{}{
 		// valid
@@ -23,17 +21,25 @@ func TestSetAndGetCells(t *testing.T) {
 		{"2022-02"},
 		{"300", "301.1", "0.03"},
 		{formuladatatype.FormulaData{Label: "A", Formula: "=SUM()"}},
+		{true, false},
 	}
 	err := r.SetCells(testcells)
-	if err != nil {
-		t.Errorf("unexpected error from SetCells, recieved [%v]", err)
+	if err == nil {
+		t.Errorf("expected error from SetCells due to invalid data, recieved [%v]", err)
 	}
 
 	all := r.GetCells()
 	// -1 as there is a failing version in there
-	if len(all) != len(testcells) {
-		pp.Println(all)
+	if len(all) != len(testcells)-1 {
 		t.Errorf("unexpected error, GetCalls should return [%v] items, actual [%v]", len(testcells), len(all))
+	}
+
+	// check the Get on a formula returns its label (as its a header)
+	h := all[4]
+	hV, _ := h.Get()
+	hAll, _ := h.GetAll()
+	if hV != hAll[0].(formuladatatype.FormulaData).Label {
+		t.Errorf("expected formula cells to return its label, actual [%T] [%v]", h, hV)
 	}
 
 	// now check some cell types

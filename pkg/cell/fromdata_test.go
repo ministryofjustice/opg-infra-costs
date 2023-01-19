@@ -7,7 +7,7 @@ import (
 	"testing"
 )
 
-func TestCellDataFromData(t *testing.T) {
+func TestCellInterfaceFromData(t *testing.T) {
 	var ty reflect.Type
 
 	// this should become a DateDateType
