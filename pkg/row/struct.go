@@ -2,7 +2,7 @@ package row
 
 import "opg-infra-costs/pkg/cell"
 
-type RowData interface {
+type RowInterface interface {
 	GetIndex() int
 	SetIndex(i int)
 
