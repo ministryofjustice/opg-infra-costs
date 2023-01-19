@@ -13,7 +13,7 @@ func FromData(data interface{}) (c CellInterface, err error) {
 	// Most specific to least
 	// -- formula as json
 	// -- formula as FormulaDate
-	// -- string as StringData
+	// -- string as ColumnHeadData
 	// -- float
 	// -- float as int
 	// -- date
@@ -21,8 +21,8 @@ func FromData(data interface{}) (c CellInterface, err error) {
 		c = &FormulaDataType[string]{}
 	} else if IsA[*FormulaDataType[FormulaData]](data) {
 		c = &FormulaDataType[FormulaData]{}
-	} else if IsA[*StringDataType[StringData]](data) {
-		c = &StringDataType[StringData]{}
+	} else if IsA[*ColumnHeadDataType[ColumnHeadData]](data) {
+		c = &ColumnHeadDataType[ColumnHeadData]{}
 	} else if IsA[*FloatDataType[float64]](data) {
 		c = &FloatDataType[float64]{}
 	} else if IsA[*FloatDataType[int]](data) {

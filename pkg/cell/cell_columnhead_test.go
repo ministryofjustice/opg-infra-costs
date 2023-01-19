@@ -4,8 +4,8 @@ import (
 	"testing"
 )
 
-func TestStringDataTypeParse(t *testing.T) {
-	c := StringDataType[StringData]{}
+func TestColumnHeadDataTypeParse(t *testing.T) {
+	c := ColumnHeadDataType[ColumnHeadData]{}
 	_, err := c.Parse("string")
 	if err == nil {
 		t.Errorf("expected parsing invalid stringdata to faile: [%v]", err)
@@ -15,23 +15,23 @@ func TestStringDataTypeParse(t *testing.T) {
 		t.Errorf("expected an error for parsing an invalid string, recieved: [%v]", err)
 	}
 
-	_, err = c.Parse(StringData{Key: "A", Display: "ACOL"})
+	_, err = c.Parse(ColumnHeadData{Key: "A", Display: "ACOL"})
 	if err != nil {
 		t.Errorf("unexpected error for parsing a valid stringdata, recieved: [%v]", err)
 	}
-	_, err = c.Parse(StringData{Key: "A"})
+	_, err = c.Parse(ColumnHeadData{Key: "A"})
 	if err != nil {
 		t.Errorf("unexpected error for parsing a valid stringdata, recieved: [%v]", err)
 	}
-	_, err = c.Parse(StringData{})
+	_, err = c.Parse(ColumnHeadData{})
 	if err == nil {
 		t.Errorf("expected error for parsing invalid stringdata - should have a property set, recieved: [%v]", err)
 	}
 
 }
-func TestStringDataTypeSet(t *testing.T) {
+func TestColumnHeadDataTypeSet(t *testing.T) {
 
-	c := StringDataType[StringData]{}
+	c := ColumnHeadDataType[ColumnHeadData]{}
 	// these should fail
 	err := c.Set("hello")
 	if err == nil {
@@ -47,21 +47,21 @@ func TestStringDataTypeSet(t *testing.T) {
 		t.Errorf("expected error when setting a set of false items: [%v]", err)
 	}
 	// test working
-	err = c.Set(StringData{Key: "A"}, StringData{Key: "B", Display: "BCOL"})
+	err = c.Set(ColumnHeadData{Key: "A"}, ColumnHeadData{Key: "B", Display: "BCOL"})
 	if err != nil {
 		t.Errorf("unexpected error, recieved [%v]", err)
 	}
 
 }
 
-func TestStringDataTypeGetAll(t *testing.T) {
+func TestColumnHeadDataTypeGetAll(t *testing.T) {
 	var err error
 	var all []interface{}
-	var c StringDataType[StringData]
+	var c ColumnHeadDataType[ColumnHeadData]
 
-	c = StringDataType[StringData]{}
+	c = ColumnHeadDataType[ColumnHeadData]{}
 	// test working
-	err = c.Set(StringData{Key: "A"}, StringData{Key: "B", Display: "BCOL"})
+	err = c.Set(ColumnHeadData{Key: "A"}, ColumnHeadData{Key: "B", Display: "BCOL"})
 	all, err = c.GetAll()
 	if err != nil {
 		t.Errorf("unexpected error, recieved [%v]", err)
@@ -70,13 +70,13 @@ func TestStringDataTypeGetAll(t *testing.T) {
 		t.Errorf("expected get to return 2 items, actual [%v]", len(all))
 	}
 
-	c = StringDataType[StringData]{}
+	c = ColumnHeadDataType[ColumnHeadData]{}
 	err = c.Set(
-		StringData{Key: "A"},
-		StringData{Key: "B", Display: "BCOL"},
-		StringData{},
+		ColumnHeadData{Key: "A"},
+		ColumnHeadData{Key: "B", Display: "BCOL"},
+		ColumnHeadData{},
 		"string",
-		StringData{Key: "C"},
+		ColumnHeadData{Key: "C"},
 	)
 	if err == nil {
 		t.Errorf("expected Set to return with an error, recieved [%v]", err)
@@ -88,14 +88,14 @@ func TestStringDataTypeGetAll(t *testing.T) {
 
 }
 
-func TestStringDataTypeGet(t *testing.T) {
+func TestColumnHeadDataTypeGet(t *testing.T) {
 	var err error
 	var v interface{}
-	var c StringDataType[StringData]
+	var c ColumnHeadDataType[ColumnHeadData]
 
-	c = StringDataType[StringData]{}
+	c = ColumnHeadDataType[ColumnHeadData]{}
 	// set several
-	err = c.Set(StringData{Key: "A"}, StringData{Key: "B", Display: "BCOL"})
+	err = c.Set(ColumnHeadData{Key: "A"}, ColumnHeadData{Key: "B", Display: "BCOL"})
 	v, err = c.Get()
 	if err != nil {
 		t.Errorf("expected Get to return without error, recieved [%v]", err)
@@ -104,10 +104,10 @@ func TestStringDataTypeGet(t *testing.T) {
 		t.Errorf("expected get to return key of the first value passed to set as it has no Display")
 	}
 
-	c = StringDataType[StringData]{}
+	c = ColumnHeadDataType[ColumnHeadData]{}
 	// set several false ones
 	err = c.Set(
-		StringData{},
+		ColumnHeadData{},
 		"",
 		100,
 	)
@@ -116,8 +116,8 @@ func TestStringDataTypeGet(t *testing.T) {
 		t.Errorf("expected get to nothing")
 	}
 
-	c = StringDataType[StringData]{}
-	c.Set(StringData{Key: "test", Display: "Test"})
+	c = ColumnHeadDataType[ColumnHeadData]{}
+	c.Set(ColumnHeadData{Key: "test", Display: "Test"})
 	v, _ = c.Get()
 	if v.(string) != "Test" {
 		t.Errorf("expected get to return the Display field, [%v]", v)

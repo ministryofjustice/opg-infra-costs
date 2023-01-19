@@ -5,22 +5,22 @@ import (
 	"reflect"
 )
 
-type StringData struct {
+type ColumnHeadData struct {
 	Display string
 	Key     string
 }
 
-type StringDataType[T StringData] struct {
+type ColumnHeadDataType[T ColumnHeadData] struct {
 	rowIsHeader bool
-	values      []StringData
+	values      []ColumnHeadData
 }
 
 // Parse handles string or []byte and returns a string interface from them
-func (c *StringDataType[T]) Parse(v interface{}) (i interface{}, err error) {
+func (c *ColumnHeadDataType[T]) Parse(v interface{}) (i interface{}, err error) {
 
 	switch v.(type) {
-	case StringData:
-		if f := v.(StringData); len(f.Display) > 0 || len(f.Key) > 0 {
+	case ColumnHeadData:
+		if f := v.(ColumnHeadData); len(f.Display) > 0 || len(f.Key) > 0 {
 			i = f
 		}
 	}
@@ -36,13 +36,13 @@ func (c *StringDataType[T]) Parse(v interface{}) (i interface{}, err error) {
 // If a parse fails, a error is set and this will be returned at the
 // end. This way all valid items are added, but it does mean the error
 // message gets overwritten
-func (c *StringDataType[T]) Set(values ...interface{}) error {
+func (c *ColumnHeadDataType[T]) Set(values ...interface{}) error {
 	var err error
 	for _, v := range values {
 		if val, parseErr := c.Parse(v); parseErr == nil {
-			c.values = append(c.values, val.(StringData))
+			c.values = append(c.values, val.(ColumnHeadData))
 		} else {
-			err = fmt.Errorf("failed to convert [%v] to a StringData format", v)
+			err = fmt.Errorf("failed to convert [%v] to a ColumnHeadData format", v)
 		}
 	}
 	return err
@@ -50,7 +50,7 @@ func (c *StringDataType[T]) Set(values ...interface{}) error {
 
 // GetAll interates over all the current `.values` and appends
 // them as an interface{} to a slice which is then returned
-func (c *StringDataType[T]) GetAll() ([]interface{}, error) {
+func (c *ColumnHeadDataType[T]) GetAll() ([]interface{}, error) {
 	interfaces := []interface{}{}
 	for _, v := range c.values {
 		interfaces = append(interfaces, v)
@@ -59,7 +59,7 @@ func (c *StringDataType[T]) GetAll() ([]interface{}, error) {
 }
 
 // Get returns the first values Display value
-func (c *StringDataType[T]) Get() (interface{}, error) {
+func (c *ColumnHeadDataType[T]) Get() (interface{}, error) {
 	var i interface{}
 
 	if len(c.values) > 0 {
@@ -75,24 +75,24 @@ func (c *StringDataType[T]) Get() (interface{}, error) {
 }
 
 // Return if the row is a header
-func (c *StringDataType[T]) GetIsRowAHeader() bool {
+func (c *ColumnHeadDataType[T]) GetIsRowAHeader() bool {
 	return c.rowIsHeader
 }
 
 // SetIsRowAHeader sets the flag
-func (c *StringDataType[T]) SetIsRowAHeader(b bool) {
+func (c *ColumnHeadDataType[T]) SetIsRowAHeader(b bool) {
 	c.rowIsHeader = b
 }
 
 // Type returns the full type of c, so should
-// be a pointer like *StringDataType[string]
-func (c *StringDataType[T]) Type() reflect.Type {
+// be a pointer like *ColumnHeadDataType[string]
+func (c *ColumnHeadDataType[T]) Type() reflect.Type {
 	return reflect.TypeOf(c)
 }
 
 // TType returns just the type of T, so for this
 // struct it would be string
-func (c *StringDataType[T]) TType() reflect.Type {
+func (c *ColumnHeadDataType[T]) TType() reflect.Type {
 	var t T
 	return reflect.TypeOf(t)
 }
