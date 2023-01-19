@@ -1,9 +1,7 @@
 package row
 
 import (
-	"opg-infra-costs/pkg/cell/datedatatype"
-	"opg-infra-costs/pkg/cell/floatdatatype"
-	"opg-infra-costs/pkg/cell/formuladatatype"
+	"opg-infra-costs/pkg/cell"
 	"testing"
 )
 
@@ -20,7 +18,7 @@ func TestSetAndGetCells(t *testing.T) {
 		{"200", "201.1", "0.02"},
 		{"2022-02"},
 		{"300", "301.1", "0.03"},
-		{formuladatatype.FormulaData{Label: "A", Formula: "=SUM()"}},
+		{cell.FormulaData{Label: "A", Formula: "=SUM()"}},
 		{true, false},
 	}
 	err := r.SetCells(testcells)
@@ -38,13 +36,13 @@ func TestSetAndGetCells(t *testing.T) {
 	h := all[4]
 	hV, _ := h.Get()
 	hAll, _ := h.GetAll()
-	if hV != hAll[0].(formuladatatype.FormulaData).Label {
+	if hV != hAll[0].(cell.FormulaData).Label {
 		t.Errorf("expected formula cells to return its label, actual [%T] [%v]", h, hV)
 	}
 
 	// now check some cell types
 	// - float
-	ty1 := &floatdatatype.FloatDataType[float64]{}
+	ty1 := &cell.FloatDataType[float64]{}
 	fl := all[0]
 	if fl.Type() != ty1.Type() {
 		t.Errorf("epxected this cell to be of type [%T], actual [%T]", ty1, fl)
@@ -54,7 +52,7 @@ func TestSetAndGetCells(t *testing.T) {
 	}
 
 	// - date
-	ty2 := &datedatatype.DateDataType[string]{}
+	ty2 := &cell.DateDataType[string]{}
 	fl = all[2]
 	if fl.Type() != ty2.Type() {
 		t.Errorf("epxected this cell to be of type [%T], actual [%T]", ty2, fl)
