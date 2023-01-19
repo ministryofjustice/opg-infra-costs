@@ -123,3 +123,7 @@ func (c *FormulaDataType[T]) TType() reflect.Type {
 	var t T
 	return reflect.TypeOf(t)
 }
+
+func (c *FormulaDataType[T]) AcceptsValuesOf(t reflect.Type) bool {
+	return t == c.TType()
+}

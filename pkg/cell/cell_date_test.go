@@ -71,7 +71,6 @@ func TestDateDataTypeGetAll(t *testing.T) {
 	all, err := c.GetAll()
 	if len(all) != 2 {
 		t.Errorf("expected GetAll to return 2 items, actual [%v]", len(all))
-		pp.Println(all)
 	}
 	if err != nil {
 		t.Errorf("expected GetAll to return without error, recieved [%v]", err)

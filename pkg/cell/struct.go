@@ -14,4 +14,5 @@ type CellInterface interface {
 
 	Type() reflect.Type
 	TType() reflect.Type
+	AcceptsValuesOf(t reflect.Type) bool
 }

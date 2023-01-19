@@ -103,3 +103,7 @@ func (c *FloatDataType[T]) TType() reflect.Type {
 	var t T
 	return reflect.TypeOf(t)
 }
+
+func (c *FloatDataType[T]) AcceptsValuesOf(t reflect.Type) bool {
+	return t == c.TType()
+}

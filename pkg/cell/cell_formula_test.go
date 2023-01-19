@@ -32,8 +32,6 @@ func TestFormulaDataTypeParse(t *testing.T) {
 	if err != nil {
 		t.Errorf("unexpected error from parsing FormulaData as json, [%v]", err)
 	}
-
-	//pp.Println(res)
 	pft = res.(FormulaData)
 	if pft.Label != "A" || pft.Formula != "=SUM()" {
 		t.Errorf("expected Parse to return a matching FormulaData from json, recieved [%v]", pft)

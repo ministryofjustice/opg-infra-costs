@@ -87,3 +87,7 @@ func (c *DateDataType[T]) TType() reflect.Type {
 	var t T
 	return reflect.TypeOf(t)
 }
+
+func (c *DateDataType[T]) AcceptsValuesOf(t reflect.Type) bool {
+	return t == c.TType()
+}
