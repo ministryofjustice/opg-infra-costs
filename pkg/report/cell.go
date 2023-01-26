@@ -7,12 +7,24 @@ import (
 	"github.com/xuri/excelize/v2"
 )
 
+// CellReference converts a row & col int into a excel colname and row
+// -- 1,1 => A1
+// -- 2,3 => C2
 func CellReference(row int, col int) string {
 	c, _ := excelize.ColumnNumberToName(col)
 	return fmt.Sprintf("%s%d", c, row)
 }
 
+// CellValueFromType uses the value set passed and the guessed data type
+// to return the value we want
+// - for float/int it should be the sum, everything else is the values[0]
 func CellValueFromType(values []string, dt ValueDataType) (value interface{}, err error) {
+
+	if len(values) <= 0 {
+		err = fmt.Errorf("values is empty")
+		return
+	}
+
 	if dt == DataIsANumber {
 		sum := 0.0
 		for _, str := range values {
@@ -23,11 +35,15 @@ func CellValueFromType(values []string, dt ValueDataType) (value interface{}, er
 	} else {
 		value = values[0]
 	}
-
 	return
 
 }
 
+// CellWrite takes cell refernce, a series of values and sheet data
+// and attempts to write the correct value to the correct location
+//
+// Number & Formula (DataIsANumber/DataIsAFormula) have additional
+// handling to set cell style or cell formula correctly
 func CellWrite(
 	ref string,
 	values []string,

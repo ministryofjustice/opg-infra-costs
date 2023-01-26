@@ -8,13 +8,13 @@ import (
 
 func TestSheetSimple(t *testing.T) {
 
-	data := RawDataset{
-		"field-key-1": RawRow{
+	data := map[string]map[string][]string{
+		"field-key-1": {
 			"AccountName":        []string{"Test1"},
 			"AccountEnvironment": []string{"Production", "Production"},
 			"2022-01":            []string{"11.35", "-1.03"},
 		},
-		"field-key-2": RawRow{
+		"field-key-2": {
 			"AccountName":        []string{"Test2"},
 			"AccountEnvironment": []string{"Production", "Production"},
 			"2022-01":            []string{"11.37", "-9.03"},
@@ -27,10 +27,8 @@ func TestSheetSimple(t *testing.T) {
 		{MapKey: "2022-01", Display: "2022-01"},
 	}
 
-	s := Sheet{}
-	s.Init()
-	s.SetName("test")
-	s.SetColumns(headers)
+	s := NewSheet("test1")
+	s.SetColumns(headers, ColumnsAreOther)
 	s.SetDataset(data)
 
 	file := excelize.NewFile()
@@ -55,8 +53,8 @@ func TestSheetSimple(t *testing.T) {
 
 func TestSheetWithCostChanges(t *testing.T) {
 
-	data := RawDataset{
-		"field-key-1": RawRow{
+	data := map[string]map[string][]string{
+		"field-key-1": {
 			"AccountName":        []string{"Test1"},
 			"AccountEnvironment": []string{"Production", "Production"},
 			"Service":            []string{"Servce 1", "Service 1"},
@@ -65,7 +63,7 @@ func TestSheetWithCostChanges(t *testing.T) {
 			"2022-03":            []string{"15.78"},
 			"2022-04":            []string{"-9.99"},
 		},
-		"field-key-2": RawRow{
+		"field-key-2": {
 			"AccountName":        []string{"Test1"},
 			"AccountEnvironment": []string{"Production", "Production"},
 			"Service":            []string{"Servce 2", "Service 2"},
@@ -92,7 +90,7 @@ func TestSheetWithCostChanges(t *testing.T) {
 	s := Sheet{}
 	s.Init()
 	s.SetName("testchanges")
-	s.SetColumns(headers)
+	s.SetColumns(headers, ColumnsAreOther)
 	s.SetDataset(data)
 
 	s.AddStyle(&excelize.Style{
@@ -101,11 +99,8 @@ func TestSheetWithCostChanges(t *testing.T) {
 
 	s.Write(file)
 
-	s.AddTable(
-		file,
-		"A1:H3",
-	)
-	s.AddPane(file, 1, 4)
+	s.AddTable(file)
+	s.AddPane(file)
 
 	//file.SaveAs(project.ROOT_DIR + "/files/costs-testcostchanges.xlsx")
 
@@ -113,8 +108,8 @@ func TestSheetWithCostChanges(t *testing.T) {
 
 func TestSheetWithFormula(t *testing.T) {
 
-	data := RawDataset{
-		"field-key-1": RawRow{
+	data := map[string]map[string][]string{
+		"field-key-1": {
 			"AccountName":        []string{"Test1"},
 			"AccountEnvironment": []string{"Production", "Production"},
 			"Service":            []string{"Servce 1", "Service 1"},
@@ -123,7 +118,7 @@ func TestSheetWithFormula(t *testing.T) {
 			"2022-03":            []string{"15.78"},
 			"2022-04":            []string{"-9.99"},
 		},
-		"field-key-2": RawRow{
+		"field-key-2": {
 			"AccountName":        []string{"Test1"},
 			"AccountEnvironment": []string{"Production", "Production"},
 			"Service":            []string{"Servce 2", "Service 2"},
@@ -152,7 +147,7 @@ func TestSheetWithFormula(t *testing.T) {
 	s := Sheet{}
 	s.Init()
 	s.SetName("test2")
-	s.SetColumns(headers)
+	s.SetColumns(headers, ColumnsAreOther)
 	s.SetDataset(data)
 	s.Write(file)
 

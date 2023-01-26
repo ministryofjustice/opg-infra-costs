@@ -1,21 +1,23 @@
 package report
 
 import (
+	"fmt"
+
 	"github.com/xuri/excelize/v2"
 )
 
 type Sheet struct {
-	name     string
-	columns  []Column
-	dataset  RawDataset
-	rowCount int
-	colCount int
-	cells    map[CellRef]CellInfo
-	styles   map[CellRef]*excelize.Style
-
-	visible bool
-	table   bool
-	pane    bool
+	name         string
+	columns      []Column
+	dataset      map[string]map[string][]string
+	rowCount     int
+	colCount     int
+	visible      bool
+	cells        map[CellRef]CellInfo
+	styles       map[CellRef]*excelize.Style
+	groupColumns []Column
+	dateColumns  []Column
+	otherColumns []Column
 }
 
 var defaultStyle = &excelize.Style{
@@ -27,16 +29,44 @@ func (s *Sheet) SetName(n string) (err error) {
 	s.name = n
 	return
 }
+func (s *Sheet) GetName() string {
+	return s.name
+}
 
 // SetColumns adds the slice passed on the existing columns slice.
 // This is therefore additive and can be called multiple times
-func (s *Sheet) SetColumns(columns []Column) (err error) {
+func (s *Sheet) SetColumns(columns []Column, ty ColumnDataType) (err error) {
 	s.columns = append(s.columns, columns...)
+
+	if ty == ColumnsAreGroupBy {
+		s.groupColumns = columns
+	} else if ty == ColumnsAreDateCost {
+		s.dateColumns = columns
+	} else {
+		s.otherColumns = append(s.otherColumns, columns...)
+	}
 	return
 }
 
+func (s *Sheet) GetGroupColumns() (fieldNames []string) {
+	for _, c := range s.groupColumns {
+		fieldNames = append(fieldNames, c.MapKey)
+	}
+	return
+}
+func (s *Sheet) GetOtherColumns() (fieldNames []string) {
+	for _, c := range s.otherColumns {
+		fieldNames = append(fieldNames, c.MapKey)
+	}
+	return
+}
+
+func (s *Sheet) GetDateCostColumns() map[string]string {
+	return map[string]string{"Date": "Cost"}
+}
+
 // SetDataset overwrites the .dataset property
-func (s *Sheet) SetDataset(ds RawDataset) (err error) {
+func (s *Sheet) SetDataset(ds map[string]map[string][]string) (err error) {
 	s.dataset = ds
 	return
 }
@@ -44,10 +74,10 @@ func (s *Sheet) SetDataset(ds RawDataset) (err error) {
 // Write generates all the content for the sheet
 // - main func to call!
 func (s *Sheet) Write(f *excelize.File) (err error) {
-	f.NewSheet(s.name)
+	i, err := f.NewSheet(s.name)
 	s.headers(f)
 	s.rows(f)
-
+	f.SetActiveSheet(i)
 	return
 }
 
@@ -56,6 +86,14 @@ func (s *Sheet) Write(f *excelize.File) (err error) {
 func (s *Sheet) Cell(row int, col int) (c CellInfo, ok bool) {
 	c, ok = s.cells[CellRef{Row: row, Col: col}]
 	return
+}
+
+func (s *Sheet) SetVisible(visible bool) (err error) {
+	s.visible = visible
+	return
+}
+func (s *Sheet) GetVisible() bool {
+	return s.visible
 }
 
 // AddStyle provides a way to overwrite the defauly cell style
@@ -77,7 +115,9 @@ func (s *Sheet) AddStyle(st *excelize.Style, row int, col int) {
 }
 
 // AddPane add panes to allow scrolling on long data sets
-func (s *Sheet) AddPane(f *excelize.File, row int, col int) (err error) {
+func (s *Sheet) AddPane(f *excelize.File) (err error) {
+	row := 1
+	col := len(s.groupColumns)
 	err = f.SetPanes(s.name, &excelize.Panes{
 		Freeze:      true,
 		XSplit:      col,
@@ -95,12 +135,15 @@ func (s *Sheet) AddPane(f *excelize.File, row int, col int) (err error) {
 }
 
 // AddTable creates a table and adds autofilters
-// rangeRef is in the form of "A1:K10"
-func (s *Sheet) AddTable(f *excelize.File, rangeRef string) (err error) {
+func (s *Sheet) AddTable(f *excelize.File) (err error) {
+	rangeRef := fmt.Sprintf(
+		"%s:%s",
+		CellReference(1, 1),
+		CellReference(s.rowCount, s.colCount-1),
+	)
 	err = f.AddTable(s.name, rangeRef, &excelize.TableOptions{
 		StyleName: "TableStyleMedium9",
 	})
-
 	f.AutoFilter(s.name, rangeRef, &excelize.AutoFilterOptions{})
 	return
 }
@@ -109,6 +152,7 @@ func (s *Sheet) AddTable(f *excelize.File, rangeRef string) (err error) {
 func (s *Sheet) Init() {
 	s.cells = make(map[CellRef]CellInfo)
 	s.styles = make(map[CellRef]*excelize.Style)
+	s.SetVisible(true)
 }
 
 // headers writes the column data into the file passed
@@ -168,4 +212,11 @@ func (s *Sheet) style(row int, col int) *excelize.Style {
 
 	return defaultStyle
 
+}
+
+func NewSheet(name string) Sheet {
+	s := Sheet{}
+	s.Init()
+	s.SetName(name)
+	return s
 }

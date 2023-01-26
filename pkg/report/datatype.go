@@ -6,7 +6,8 @@ import (
 	"time"
 )
 
-// DataType looks at the value and tries to covnert it
+// DataType looks at the value and guess what datatype it is
+// returning those it has matched, otehrwise a generic error
 func DataType(value interface{}) (dt ValueDataType, err error) {
 
 	err = fmt.Errorf("unable to match data type of [%v]", value)

@@ -5,19 +5,23 @@ import "github.com/xuri/excelize/v2"
 // -- Date handling
 const DATEFORMAT string = "2006-01"
 
-// -- Data struct for csv read and converted data
-type RawDataset map[string]RawRow
-type RawRow map[string][]string
-
 // -- Sheet main interface
 type SheetInterface interface {
 	SetName(name string) error
-	SetColumns(cols []Column) error
-	SetDataset(ds RawDataset) error
+	GetName() string
 
+	SetColumns(cols []Column, ty ColumnDataType) error
+	GetGroupColumns() []string
+	GetDateCostColumns() map[string]string
+	GetOtherColumns() []string
+
+	SetDataset(ds map[string]map[string][]string) error
+
+	SetVisible(v bool) error
+	GetVisible() bool
 	AddStyle(st *excelize.Style, row int, col int)
-	AddTable(f *excelize.File, rangeRef string) error
-	AddPane(f *excelize.File, row int, col int) (err error)
+	AddTable(f *excelize.File) error
+	AddPane(f *excelize.File) (err error)
 
 	Write(f excelize.File) error
 	Cell(ref string) (CellInfo, bool)
@@ -29,6 +33,13 @@ type Column struct {
 	Display string
 	Formula string
 }
+type ColumnDataType string
+
+const (
+	ColumnsAreGroupBy  ColumnDataType = "group-by"
+	ColumnsAreDateCost ColumnDataType = "date-cost"
+	ColumnsAreOther    ColumnDataType = "other"
+)
 
 // -- CELLS
 type CellRef struct {
