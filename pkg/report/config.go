@@ -71,6 +71,7 @@ func Reports(
 		exVat[x.MapKey] = []string{x.Formula}
 	}
 	totals.AddRow("excluding-vat", exVat)
+	totals.AddCell(2, 1, "($) including Tax")
 
 	// -- Service
 	name = "Service"

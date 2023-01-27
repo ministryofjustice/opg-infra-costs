@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"math"
 	"strconv"
+	"unicode/utf8"
 
 	"github.com/xuri/excelize/v2"
 )
@@ -103,6 +104,8 @@ func (s *Sheet) Write(f *excelize.File) (i int, err error) {
 	for _, cell := range s.cells {
 		err = CellWriter(cell, s.name, f)
 	}
+	s.adjustColWidth(f)
+
 	return
 }
 
@@ -233,6 +236,8 @@ func (s *Sheet) RowVisibility(f *excelize.File) (hidden []int, err error) {
 	return
 }
 
+// AddCell pushes new values into the cells slice
+// -- will overwrite
 func (s *Sheet) AddCell(row int, col int, value string) (CellInfo, error) {
 	var foundAt CellRef
 	var found bool = false
@@ -281,16 +286,11 @@ func (s *Sheet) AddRow(rowKey string, row map[string][]string) (mapped map[strin
 	for _, col := range s.columns {
 		// meta data
 		s.rowKeyIndexMap[rowKey].Columns[col.Key()] = s.colCount
+		// update the column number
 		formulaReplacements["c"] = strconv.Itoa(s.colCount)
-
 		ref := CellRef{Row: s.rowCount, Col: s.colCount, RowKey: rowKey}
-
 		c := NewCellInfo(ref, s.style(s.rowCount, s.colCount))
-		c.SetValue(
-			col,
-			row[col.MapKey],
-			formulaReplacements,
-		)
+		c.SetValue(col, row[col.MapKey], formulaReplacements)
 		s.cells[ref] = c
 
 		s.colCount++
@@ -311,6 +311,25 @@ func (s *Sheet) Init() {
 }
 
 // === internal
+func (s *Sheet) adjustColWidth(f *excelize.File) {
+	l := len(s.groupColumns)
+	cols, _ := f.GetCols(s.GetName())
+	// loop over columns
+	for idx, column := range cols {
+		maxWidth := 0
+		if idx < l {
+			// loop over cells in the column to find longest
+			for _, cell := range column {
+				width := utf8.RuneCountInString(cell) + 4
+				if width > maxWidth {
+					maxWidth = width
+				}
+			}
+			columnName, _ := excelize.ColumnNumberToName(idx + 1)
+			f.SetColWidth(s.GetName(), columnName, columnName, float64(maxWidth))
+		}
+	}
+}
 
 // headers generates the cell data for the current .columns
 func (s *Sheet) headers() map[string]RowKeyIndexSet {
@@ -333,7 +352,6 @@ func (s *Sheet) headers() map[string]RowKeyIndexSet {
 // get the value and writes that to the `.cells`
 // -- will parse formula values as well
 func (s *Sheet) rows() map[string]RowKeyIndexSet {
-
 	for rowKey, row := range s.dataset {
 		s.AddRow(rowKey, row)
 	}
