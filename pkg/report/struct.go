@@ -23,7 +23,9 @@ type SheetInterface interface {
 	SetTableOptions(options *excelize.TableOptions) error
 	SetHideRowWhen(criteria map[CellRef]float64) (err error)
 
-	SetDataset(ds map[string]map[string][]string) error
+	SetDataset(ds map[string]map[string][]string) (mapped map[string]RowKeyIndexSet, err error)
+	AddRow(key string, cells map[string][]string) (mapped map[string]RowKeyIndexSet, err error)
+	AddCell(row int, col int, value string) error
 
 	Write(f excelize.File) (int, error)
 	AddTable(f *excelize.File) error

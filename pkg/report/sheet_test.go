@@ -1,6 +1,7 @@
 package report
 
 import (
+	"fmt"
 	"strconv"
 	"testing"
 
@@ -116,7 +117,8 @@ func TestSheetWithFormula(t *testing.T) {
 		keyed["r2"].Index,
 		keyed["r2"].Columns["Totals"],
 	)
-	if sum.Value.(string) != "=SUM(E2:H2)" {
+	f := fmt.Sprintf("=SUM(E%d:H%d)", keyed["r2"].Index, keyed["r2"].Index)
+	if sum.Value.(string) != f {
 		t.Errorf("unexpected formula value [%v]", sum.Value)
 	}
 	a, _ := strconv.ParseFloat(data["r2"]["2022-01"][0], 64)
@@ -290,4 +292,26 @@ func TestSheetSetDataset(t *testing.T) {
 	if a3.Value.(string) != "Test2" {
 		t.Errorf("unexpected value [%v]", a3.Value)
 	}
+
+	// add a new row to the data
+	keyed, _ = s.AddRow("add-a-row-test", map[string][]string{
+		"AccountName":        {"Test3"},
+		"AccountEnvironment": {"Dev"},
+		"2022-01":            {"1000.13"},
+	})
+
+	c4, _ := s.Cell(
+		keyed["add-a-row-test"].Index,
+		keyed["add-a-row-test"].Columns["2022-01"],
+	)
+	if c4.Value.(float64) != 1000.13 {
+		t.Errorf("unexpected value [%v]", c4.Value)
+	}
+
+	s.AddCell(2, 1, "NewAccount")
+	cA, _ := s.Cell(2, 1)
+	if cA.Value.(string) != "NewAccount" {
+		t.Errorf("Cell overwrite did not work [%v]", cA.Value)
+	}
+
 }

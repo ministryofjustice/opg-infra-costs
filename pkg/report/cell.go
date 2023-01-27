@@ -7,14 +7,6 @@ import (
 	"github.com/xuri/excelize/v2"
 )
 
-func (c *CellInfo) CalculatedValue(f *excelize.File, sheet string) (string, error) {
-	return f.CalcCellValue(sheet, c.Ref.String())
-}
-
-func (r *CellRef) String() string {
-	return CellReference(r.Row, r.Col)
-}
-
 // CellReference converts a row & col int into a excel colname and row
 // -- 1,1 => A1
 // -- 2,3 => C2
@@ -70,4 +62,48 @@ func CellWriter(
 		err = f.SetCellValue(sheet, refStr, cell.Value)
 	}
 	return
+}
+
+func (r *CellRef) String() string {
+	return CellReference(r.Row, r.Col)
+}
+
+func (c *CellInfo) CalculatedValue(f *excelize.File, sheet string) (string, error) {
+	return f.CalcCellValue(sheet, c.Ref.String())
+}
+
+func (c *CellInfo) SetValue(
+	columnHeader Column,
+	srcValues []string,
+	formulaReplacements map[string]interface{},
+) {
+	var values []string = []string{"0.0"}
+	var value interface{}
+	// if the heading is a formula, overwrite the content
+	if len(columnHeader.Formula) > 0 {
+		values = []string{columnHeader.Formula}
+	} else if len(srcValues) > 0 {
+		values = srcValues
+	}
+	// set the value type
+	val := values[0]
+	c.ValueType, _ = DataType(val)
+
+	if c.ValueType == DataIsAFormula {
+		value, _ = ParseFormula(val, formulaReplacements)
+	} else {
+		value, _ = CellValueFromType(values, c.ValueType)
+	}
+	c.Value = value
+
+}
+
+func NewCellInfo(
+	ref CellRef,
+	style *excelize.Style,
+) CellInfo {
+	return CellInfo{
+		Style: style,
+		Ref:   ref,
+	}
 }

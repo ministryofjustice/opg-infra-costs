@@ -25,6 +25,20 @@ func Reports(
 	}
 	pre := preDateHeaders(dateHeaders)
 	post := postDateHeaders(dateHeaders, pre)
+	// -- Detailed Breakdown
+	name = "Detailed Breakdown"
+	detailedBreakdown := NewSheet(name)
+	detailedBreakdown.SetColumns(pre[name], ColumnsAreGroupBy)
+	detailedBreakdown.SetColumns(dateHeaders, ColumnsAreDateCost)
+	detailedBreakdown.SetColumns(post[name], ColumnsAreOther)
+	detailedBreakdown.SetDataset(
+		convert.Convert(
+			rawDataset,
+			detailedBreakdown.GetGroupColumns(),
+			detailedBreakdown.GetTransposeColumns(),
+			detailedBreakdown.GetOtherColumns(),
+		),
+	)
 
 	// -- totals
 	name = "Totals"
@@ -41,6 +55,22 @@ func Reports(
 			totals.GetOtherColumns(),
 		),
 	)
+	// add custom row of data for showing non-vat
+	exVat := map[string][]string{
+		"Org": {"($) excluding Tax"},
+	}
+	k := detailedBreakdown.GetName()
+	startCol := len(pre[k]) + 1
+	for _, d := range dateHeaders {
+		col, _ := excelize.ColumnNumberToName(startCol)
+		f := fmt.Sprintf("=SUMIF('%s'!C:C,\"<>Tax\",  '%s'!%s:%s)", k, k, col, col)
+		exVat[d.MapKey] = []string{f}
+		startCol++
+	}
+	for _, x := range post[name] {
+		exVat[x.MapKey] = []string{x.Formula}
+	}
+	totals.AddRow("excluding-vat", exVat)
 
 	// -- Service
 	name = "Service"
@@ -69,21 +99,6 @@ func Reports(
 			serviceAndEnvironment.GetGroupColumns(),
 			serviceAndEnvironment.GetTransposeColumns(),
 			serviceAndEnvironment.GetOtherColumns(),
-		),
-	)
-
-	// -- Detailed Breakdown
-	name = "Detailed Breakdown"
-	detailedBreakdown := NewSheet(name)
-	detailedBreakdown.SetColumns(pre[name], ColumnsAreGroupBy)
-	detailedBreakdown.SetColumns(dateHeaders, ColumnsAreDateCost)
-	detailedBreakdown.SetColumns(post[name], ColumnsAreOther)
-	detailedBreakdown.SetDataset(
-		convert.Convert(
-			rawDataset,
-			detailedBreakdown.GetGroupColumns(),
-			detailedBreakdown.GetTransposeColumns(),
-			detailedBreakdown.GetOtherColumns(),
 		),
 	)
 

@@ -9,20 +9,21 @@ import (
 )
 
 type Sheet struct {
-	name          string
-	columns       []Column
-	dataset       map[string]map[string][]string
-	rowCount      int
-	colCount      int
-	visible       bool
-	cells         map[CellRef]CellInfo
-	styles        map[CellRef]*excelize.Style
-	tableOptions  *excelize.TableOptions
-	filterOptions *excelize.AutoFilterOptions
-	groupColumns  []Column
-	dateColumns   []Column
-	otherColumns  []Column
-	hideRowWhen   map[CellRef]float64
+	name           string
+	columns        []Column
+	dataset        map[string]map[string][]string
+	rowCount       int
+	colCount       int
+	visible        bool
+	cells          map[CellRef]CellInfo
+	styles         map[CellRef]*excelize.Style
+	tableOptions   *excelize.TableOptions
+	filterOptions  *excelize.AutoFilterOptions
+	groupColumns   []Column
+	dateColumns    []Column
+	otherColumns   []Column
+	hideRowWhen    map[CellRef]float64
+	rowKeyIndexMap map[string]RowKeyIndexSet
 }
 
 var defaultStyle = &excelize.Style{
@@ -86,19 +87,12 @@ func (s *Sheet) GetTransposeColumns() map[string]string {
 
 // SetDataset overwrites the .dataset property & then generates the
 // .cells list
-func (s *Sheet) SetDataset(ds map[string]map[string][]string) (counterMap map[string]RowKeyIndexSet, err error) {
+func (s *Sheet) SetDataset(ds map[string]map[string][]string) (mapped map[string]RowKeyIndexSet, err error) {
 	s.dataset = ds
-	header := s.headers()
-	rows := s.rows()
+	s.headers()
+	s.rows()
 
-	counterMap = make(map[string]RowKeyIndexSet)
-	for k, rk := range header {
-		counterMap[k] = rk
-	}
-	for k, rk := range rows {
-		counterMap[k] = rk
-	}
-
+	mapped = s.rowKeyIndexMap
 	return
 }
 
@@ -239,12 +233,80 @@ func (s *Sheet) RowVisibility(f *excelize.File) (hidden []int, err error) {
 	return
 }
 
+func (s *Sheet) AddCell(row int, col int, value string) (CellInfo, error) {
+	var foundAt CellRef
+	var found bool = false
+	var c CellInfo
+
+	if col > len(s.columns) {
+		return c, fmt.Errorf("column out of range")
+	}
+	if row > s.rowCount {
+		return c, fmt.Errorf("row out of range")
+	}
+
+	formulaReplacements := map[string]interface{}{
+		"r": strconv.Itoa(row),
+		"c": strconv.Itoa(col),
+	}
+	// look for an existing cell
+	for k, cell := range s.cells {
+		if cell.Ref.Row == row && cell.Ref.Col == col {
+			foundAt = k
+			found = true
+		}
+	}
+	if !found {
+		foundAt = CellRef{Row: row, Col: col, RowKey: "additional"}
+	}
+	c = NewCellInfo(foundAt, s.style(row, col))
+	header := s.columns[col]
+	c.SetValue(header, []string{value}, formulaReplacements)
+
+	s.cells[foundAt] = c
+	return c, nil
+}
+
+// AddRow takes a map os values and a row key and pushes a set if new cells into .cells
+func (s *Sheet) AddRow(rowKey string, row map[string][]string) (mapped map[string]RowKeyIndexSet, err error) {
+	s.rowCount++
+	s.colCount = 1
+	formulaReplacements := map[string]interface{}{
+		"r": strconv.Itoa(s.rowCount),
+		"c": "1",
+	}
+	//key to index, as range over map is not consistent
+	s.rowKeyIndexMap[rowKey] = RowKeyIndexSet{Index: s.rowCount, Columns: make(map[string]int)}
+	// now loop over the columns and fetch that data from the row
+	for _, col := range s.columns {
+		// meta data
+		s.rowKeyIndexMap[rowKey].Columns[col.Key()] = s.colCount
+		formulaReplacements["c"] = strconv.Itoa(s.colCount)
+
+		ref := CellRef{Row: s.rowCount, Col: s.colCount, RowKey: rowKey}
+
+		c := NewCellInfo(ref, s.style(s.rowCount, s.colCount))
+		c.SetValue(
+			col,
+			row[col.MapKey],
+			formulaReplacements,
+		)
+		s.cells[ref] = c
+
+		s.colCount++
+	}
+
+	mapped = s.rowKeyIndexMap
+	return
+}
+
 // Init runs all the default setup for the sheet
 func (s *Sheet) Init() {
 	s.cells = make(map[CellRef]CellInfo)
 	s.styles = make(map[CellRef]*excelize.Style)
 	s.tableOptions = defaultTableOptions
 	s.filterOptions = defaultFilterOptions
+	s.rowKeyIndexMap = make(map[string]RowKeyIndexSet)
 	s.SetVisible(true)
 }
 
@@ -254,66 +316,28 @@ func (s *Sheet) Init() {
 func (s *Sheet) headers() map[string]RowKeyIndexSet {
 	s.rowCount = 1
 	s.colCount = 1
-	keyToCounter := map[string]RowKeyIndexSet{}
 	// this writes the headers
 	rowKey := "Header"
-	keyToCounter[rowKey] = RowKeyIndexSet{Index: s.rowCount, Columns: map[string]int{}}
+	s.rowKeyIndexMap[rowKey] = RowKeyIndexSet{Index: s.rowCount, Columns: make(map[string]int)}
 	for _, col := range s.columns {
 		ref := CellRef{Row: s.rowCount, Col: s.colCount, RowKey: rowKey}
 		s.cells[ref] = CellInfo{Value: col.Display, Ref: ref}
 
-		keyToCounter[rowKey].Columns[col.Key()] = s.colCount
+		s.rowKeyIndexMap[rowKey].Columns[col.Key()] = s.colCount
 		s.colCount++
 	}
-	return keyToCounter
+	return s.rowKeyIndexMap
 }
 
 // rows iterates over the dataset, then loops over the columns
 // get the value and writes that to the `.cells`
 // -- will parse formula values as well
 func (s *Sheet) rows() map[string]RowKeyIndexSet {
-	keyToCounter := map[string]RowKeyIndexSet{}
 
 	for rowKey, row := range s.dataset {
-		s.rowCount++
-		s.colCount = 1
-		formulaReplacements := map[string]interface{}{
-			"r": strconv.Itoa(s.rowCount),
-		}
-		//key to index, as range over map is not consistent
-		keyToCounter[rowKey] = RowKeyIndexSet{Index: s.rowCount, Columns: map[string]int{}}
-		// now loop over the columns and fetch that data from the row
-		for _, col := range s.columns {
-			keyToCounter[rowKey].Columns[col.Key()] = s.colCount
-
-			ref := CellRef{Row: s.rowCount, Col: s.colCount, RowKey: rowKey}
-			style := s.style(s.rowCount, s.colCount)
-
-			// get the set of values
-			var values []string = []string{"0.0"}
-			if len(col.Formula) > 0 {
-				values = []string{col.Formula}
-			} else if v, ok := row[col.MapKey]; ok && len(v) > 0 {
-				values = v
-			}
-
-			valueType, _ := DataType(values[0])
-			value, _ := CellValueFromType(values, valueType)
-			if valueType == DataIsAFormula {
-				value, _ = ParseFormula(value.(string), formulaReplacements)
-			}
-
-			s.cells[ref] = CellInfo{
-				Value:     value,
-				ValueType: valueType,
-				Style:     style,
-				Ref:       ref,
-			}
-			s.colCount++
-		}
-
+		s.AddRow(rowKey, row)
 	}
-	return keyToCounter
+	return s.rowKeyIndexMap
 }
 
 // style gets the style for the row/col passed

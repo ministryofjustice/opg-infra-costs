@@ -3,11 +3,11 @@ package report
 import "strings"
 
 func ParseFormula(
-	formula string,
+	subject string,
 	replacements map[string]interface{},
 
 ) (parsed string, err error) {
-	parsed = formula
+	parsed = subject
 	for k, r := range replacements {
 		parsed = strings.ReplaceAll(parsed, "${"+k+"}", r.(string))
 	}
