@@ -9,6 +9,8 @@ import (
 	"github.com/xuri/excelize/v2"
 )
 
+// Reports provides a set of pre-configured sheets
+// with columns and data sets converted
 func Reports(
 	start time.Time,
 	end time.Time,
@@ -27,12 +29,13 @@ func Reports(
 	// -- totals
 	name = "Totals"
 	totals := NewSheet(name)
+	totalData := rawDataset
 	totals.SetColumns(pre[name], ColumnsAreGroupBy)
 	totals.SetColumns(dateHeaders, ColumnsAreDateCost)
 	totals.SetColumns(post[name], ColumnsAreOther)
 	totals.SetDataset(
 		convert.Convert(
-			rawDataset,
+			totalData,
 			totals.GetGroupColumns(),
 			totals.GetTransposeColumns(),
 			totals.GetOtherColumns(),
@@ -101,8 +104,9 @@ func Reports(
 	)
 
 	// -- Cost changes
+	// 	Has some custom columns and additional styles as well
+	//	hiding rows that dont match certain criteria
 	name = "Cost Changes"
-
 	post["Cost Changes"] = []Column{
 		{
 			Display: "Increase ($)",
@@ -138,6 +142,7 @@ func Reports(
 		{Col: 7}: 0.15,
 	}
 	costChanges.SetHideRowWhen(hide)
+
 	// -- add everything in
 	sheets = append(sheets, totals)
 	sheets = append(sheets, service)
@@ -149,6 +154,9 @@ func Reports(
 	return
 }
 
+// preDateHeaders returns a map based on sheet name of all
+// columns required before the date/cost information is included
+// Typically account name, environment, service etc
 func preDateHeaders(dateHeaders []Column) map[string][]Column {
 	return map[string][]Column{
 		"Cost Changes": {
@@ -181,6 +189,9 @@ func preDateHeaders(dateHeaders []Column) map[string][]Column {
 
 }
 
+// postDateHeaders provides a map keyed to the sheet name of
+// all columns that come after the date/cost cols.
+// Typically for totals & trend lines
 func postDateHeaders(dateHeaders []Column, preHeaders map[string][]Column) (post map[string][]Column) {
 	trendOptions := "{\"charttype\",\"column\";\"empty\",\"ignore\";\"nan\",\"convert\"}"
 	post = map[string][]Column{}

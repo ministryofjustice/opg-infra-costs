@@ -7,6 +7,14 @@ import (
 	"github.com/xuri/excelize/v2"
 )
 
+func (c *CellInfo) CalculatedValue(f *excelize.File, sheet string) (string, error) {
+	return f.CalcCellValue(sheet, c.Ref.String())
+}
+
+func (r *CellRef) String() string {
+	return CellReference(r.Row, r.Col)
+}
+
 // CellReference converts a row & col int into a excel colname and row
 // -- 1,1 => A1
 // -- 2,3 => C2
@@ -37,6 +45,26 @@ func CellValueFromType(values []string, dt ValueDataType) (value interface{}, er
 	}
 	return
 
+}
+
+func CellWriter(
+	cell CellInfo,
+	sheet string,
+	f *excelize.File,
+) (err error) {
+	refStr := cell.Ref.String()
+	cellStyle, _ := f.NewStyle(cell.Style)
+
+	if cell.ValueType == DataIsANumber {
+		f.SetCellStyle(sheet, refStr, refStr, cellStyle)
+		err = f.SetCellValue(sheet, refStr, cell.Value)
+	} else if cell.ValueType == DataIsAFormula {
+		f.SetCellStyle(sheet, refStr, refStr, cellStyle)
+		f.SetCellFormula(sheet, refStr, cell.Value.(string)[1:], excelize.FormulaOpts{})
+	} else {
+		err = f.SetCellValue(sheet, refStr, cell.Value)
+	}
+	return
 }
 
 // CellWrite takes cell refernce, a series of values and sheet data

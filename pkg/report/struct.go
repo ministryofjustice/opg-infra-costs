@@ -32,7 +32,7 @@ type SheetInterface interface {
 	SetHideRowWhen(criteria map[CellRef]float64) (err error)
 	RowVisibility(f *excelize.File) (hidden []int, err error)
 
-	Cell(ref string) (CellInfo, bool)
+	Cell(row int, col int) (c CellInfo, ok bool)
 }
 
 // -- COLUMNS
@@ -51,11 +51,13 @@ const (
 
 // -- CELLS
 type CellRef struct {
-	Row int
-	Col int
+	Row    int
+	Col    int
+	RowKey string
 }
 type CellInfo struct {
 	Value     interface{}
+	Ref       CellRef
 	ValueType ValueDataType
 	Style     *excelize.Style
 }

@@ -84,9 +84,12 @@ func (s *Sheet) GetTransposeColumns() map[string]string {
 	return map[string]string{"Date": "Cost"}
 }
 
-// SetDataset overwrites the .dataset property
+// SetDataset overwrites the .dataset property & then generates the
+// .cells list
 func (s *Sheet) SetDataset(ds map[string]map[string][]string) (err error) {
 	s.dataset = ds
+	s.headers()
+	s.rows()
 	return
 }
 
@@ -94,15 +97,22 @@ func (s *Sheet) SetDataset(ds map[string]map[string][]string) (err error) {
 // - main func to generate data for the sheet
 func (s *Sheet) Write(f *excelize.File) (i int, err error) {
 	i, err = f.NewSheet(s.name)
-	s.headers(f)
-	s.rows(f)
+	for _, cell := range s.cells {
+		err = CellWriter(cell, s.name, f)
+	}
 	return
 }
 
 // Cell will retrieve the value and type information for cell
 // at the row|col passed
 func (s *Sheet) Cell(row int, col int) (c CellInfo, ok bool) {
-	c, ok = s.cells[CellRef{Row: row, Col: col}]
+	ok = false
+	for _, cell := range s.cells {
+		if cell.Ref.Row == row && cell.Ref.Col == col {
+			c = cell
+			ok = true
+		}
+	}
 	return
 }
 
@@ -178,11 +188,14 @@ func (s *Sheet) SetTableOptions(options *excelize.TableOptions) (err error) {
 	return
 }
 
+// SetHideRowWhen allows configuration of how to hide certain rows
 func (s *Sheet) SetHideRowWhen(criteria map[CellRef]float64) (err error) {
 	s.hideRowWhen = criteria
 	return
 }
 
+// RowVisibility uses hideRowWhen to hide certain rows
+// - all critera has to pass for the row to be visible
 func (s *Sheet) RowVisibility(f *excelize.File) (hidden []int, err error) {
 	if len(s.hideRowWhen) > 0 {
 		for i := 2; i <= s.rowCount; i++ {
@@ -204,7 +217,7 @@ func (s *Sheet) RowVisibility(f *excelize.File) (hidden []int, err error) {
 				if !greater {
 					showRow = false
 				}
-				fmt.Printf("[%s]\t (%.2f >= %v)\t(%v)\n", cell, val, crit, greater)
+				//fmt.Printf("[%s]\t (%.2f >= %v)\t(%v)\n", cell, val, crit, greater)
 			}
 
 			if !showRow {
@@ -228,52 +241,55 @@ func (s *Sheet) Init() {
 
 // === internal
 
-// headers writes the column data into the file passed
-func (s *Sheet) headers(f *excelize.File) {
+// headers generates the cell data for the current .columns
+func (s *Sheet) headers() {
 	s.rowCount = 1
 	s.colCount = 1
 	// this writes the headers
 	for _, col := range s.columns {
-		ref := CellRef{Row: s.rowCount, Col: s.colCount}
-		cell := CellReference(s.rowCount, s.colCount)
-		f.SetCellValue(s.name, cell, col.Display)
-		// store the cell
-		s.cells[ref] = CellInfo{Value: col.Display}
+		ref := CellRef{Row: s.rowCount, Col: s.colCount, RowKey: "Header"}
+		s.cells[ref] = CellInfo{Value: col.Display, Ref: ref}
 		s.colCount++
 	}
 }
 
 // rows iterates over the dataset, then loops over the columns
-// get the value and writes that to the file
-// -- handles formula overwrite for values
-func (s *Sheet) rows(f *excelize.File) {
-	// now add the data
-	for _, row := range s.dataset {
+// get the value and writes that to the `.cells`
+// -- will parse formula values as well
+func (s *Sheet) rows() {
+
+	for rowKey, row := range s.dataset {
 		s.rowCount++
 		s.colCount = 1
+
+		formulaReplacements := map[string]interface{}{
+			"r": strconv.Itoa(s.rowCount),
+		}
 		// now loop over the columns and fetch that data from the row
 		for _, col := range s.columns {
-			ref := CellRef{Row: s.rowCount, Col: s.colCount}
-			cell := CellReference(s.rowCount, s.colCount)
+			ref := CellRef{Row: s.rowCount, Col: s.colCount, RowKey: rowKey}
 			style := s.style(s.rowCount, s.colCount)
-			var values []string
-			// formula check here, overwrite the values to be the formula
+
+			// get the set of values
+			var values []string = []string{"0.0"}
 			if len(col.Formula) > 0 {
 				values = []string{col.Formula}
-			} else {
-				values = row[col.MapKey]
-			}
-			// pad the cell with empty data
-			if len(values) <= 0 {
-				values = []string{"0.0"}
+			} else if v, ok := row[col.MapKey]; ok && len(v) > 0 {
+				values = v
 			}
 
-			v, t, st, e := CellWrite(cell, values, s.name, s.rowCount, f, style)
-			if e != nil {
-				fmt.Printf("[%s] no data for [%s] [%v]\n", cell, col.MapKey, e)
+			valueType, _ := DataType(values[0])
+			value, _ := CellValueFromType(values, valueType)
+			if valueType == DataIsAFormula {
+				value, _ = ParseFormula(value.(string), formulaReplacements)
 			}
-			// track the cell
-			s.cells[ref] = CellInfo{Value: v, ValueType: t, Style: st}
+
+			s.cells[ref] = CellInfo{
+				Value:     value,
+				ValueType: valueType,
+				Style:     style,
+				Ref:       ref,
+			}
 			s.colCount++
 		}
 

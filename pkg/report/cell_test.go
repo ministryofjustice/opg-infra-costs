@@ -67,5 +67,4 @@ func TestCellWrite(t *testing.T) {
 	if dt != DataIsANumber {
 		t.Errorf("expected to be a number, recieved [%v]", dt)
 	}
-
 }
