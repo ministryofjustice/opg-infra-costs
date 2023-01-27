@@ -109,10 +109,12 @@ func Reports(
 	name = "Cost Changes"
 	post["Cost Changes"] = []Column{
 		{
+			MapKey:  "Increase ($)",
 			Display: "Increase ($)",
 			Formula: "=(E${r}-D${r})",
 		},
 		{
+			MapKey:  "Increase (%)",
 			Display: "Increase (%)",
 			Formula: "=IFERROR( (E${r}/D${r})-1, 0 )",
 		},
@@ -209,10 +211,12 @@ func postDateHeaders(dateHeaders []Column, preHeaders map[string][]Column) (post
 		dateEnd, _ := excelize.ColumnNumberToName(len(preHeaders[s]) + len(dateHeaders))
 		post[s] = []Column{
 			{
+				MapKey:  "Totals",
 				Display: "Totals",
 				Formula: fmt.Sprintf("=SUM(%s${r}:%s${r})", dateStart, dateEnd),
 			},
 			{
+				MapKey:  "Trend",
 				Display: "Trend",
 				Formula: fmt.Sprintf("=SPARKLINE(%s${r}:%s${r}, %s)", dateStart, dateEnd, trendOptions),
 			},

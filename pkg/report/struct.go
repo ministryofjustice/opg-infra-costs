@@ -18,18 +18,16 @@ type SheetInterface interface {
 	GetTransposeColumns() map[string]string
 	GetOtherColumns() []string
 
-	SetDataset(ds map[string]map[string][]string) error
 	AddStyle(st *excelize.Style, row int, col int)
-
 	SetFilterOptions(options *excelize.AutoFilterOptions) error
 	SetTableOptions(options *excelize.TableOptions) error
+	SetHideRowWhen(criteria map[CellRef]float64) (err error)
+
+	SetDataset(ds map[string]map[string][]string) error
 
 	Write(f excelize.File) (int, error)
-
 	AddTable(f *excelize.File) error
 	AddPane(f *excelize.File) error
-
-	SetHideRowWhen(criteria map[CellRef]float64) (err error)
 	RowVisibility(f *excelize.File) (hidden []int, err error)
 
 	Cell(row int, col int) (c CellInfo, ok bool)
@@ -48,6 +46,12 @@ const (
 	ColumnsAreDateCost ColumnDataType = "date-cost"
 	ColumnsAreOther    ColumnDataType = "other"
 )
+
+// -- ROWS
+type RowKeyIndexSet struct {
+	Index   int
+	Columns map[string]int
+}
 
 // -- CELLS
 type CellRef struct {

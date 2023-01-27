@@ -2,8 +2,6 @@ package report
 
 import (
 	"testing"
-
-	"github.com/xuri/excelize/v2"
 )
 
 func TestCellReference(t *testing.T) {
@@ -47,24 +45,4 @@ func TestCellValueFromType(t *testing.T) {
 		t.Errorf("expected first value to be returned, actual [%v]", cv)
 	}
 
-}
-
-func TestCellWrite(t *testing.T) {
-	var err error
-	f := excelize.NewFile()
-	f.NewSheet("testcellwrite")
-
-	// CellWrite( ref string, values []string, sheet string, rowCount int, f *excelize.File, style *excelize.Style) (val interface{}, dt ValueDataType, s *excelize.Style, err error)
-
-	val, dt, _, err := CellWrite("A1", []string{"100.01", "99.0"}, "testcellwrite", 1, f, defaultStyle)
-	if err != nil {
-		t.Errorf("unexpected error [%v]", err)
-	}
-
-	if val.(float64) != 199.01 {
-		t.Errorf("returned value does not match, recieved [%v]", val)
-	}
-	if dt != DataIsANumber {
-		t.Errorf("expected to be a number, recieved [%v]", dt)
-	}
 }

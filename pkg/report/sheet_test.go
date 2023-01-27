@@ -30,16 +30,22 @@ func TestSheetSimple(t *testing.T) {
 
 	s := NewSheet("test1")
 	s.SetColumns(headers, ColumnsAreOther)
-	s.SetDataset(data)
+	keyed, _ := s.SetDataset(data)
 
-	c2, _ := s.Cell(2, 3)
+	c2, _ := s.Cell(
+		keyed["r2"].Index,
+		keyed["r2"].Columns["2022-01"],
+	)
 	if c2.ValueType != DataIsANumber {
 		t.Errorf("expected c2 to be a float [%v]", c2)
 	}
 	if c2.Value.(float64) != 10.32 {
 		t.Errorf("unexpected value [%v]", c2.Value)
 	}
-	a3, _ := s.Cell(3, 1)
+	a3, _ := s.Cell(
+		keyed["r3"].Index,
+		keyed["r3"].Columns["AccountName"],
+	)
 	if a3.ValueType != DataIsAString {
 		t.Errorf("expected to be a string [%v]", a3)
 	}
@@ -76,30 +82,40 @@ func TestSheetWithFormula(t *testing.T) {
 		{MapKey: "2022-02", Display: "2022-02"},
 		{MapKey: "2022-03", Display: "2022-03"},
 		{MapKey: "2022-04", Display: "2022-04"},
-		{MapKey: "", Display: "Totals", Formula: "=SUM(E${r}:H${r})"},
-		{MapKey: "", Display: "Trend", Formula: "=SPARKLINE(E${r}:H${r}, {\"charttype\",\"column\";\"empty\",\"ignore\";\"nan\",\"convert\"})"},
+		{MapKey: "Totals", Display: "Totals", Formula: "=SUM(E${r}:H${r})"},
+		{MapKey: "Trend", Display: "Trend", Formula: "=SPARKLINE(E${r}:H${r}, {\"charttype\",\"column\";\"empty\",\"ignore\";\"nan\",\"convert\"})"},
 	}
 
 	s := Sheet{}
 	s.Init()
 	s.SetName("test2")
 	s.SetColumns(headers, ColumnsAreOther)
-	s.SetDataset(data)
+	keyed, _ := s.SetDataset(data)
 
-	file := excelize.NewFile()
-	s.Write(file)
+	totals, _ := s.Cell(
+		keyed["Header"].Index,
+		keyed["Header"].Columns["Totals"],
+	)
 
-	totals, _ := s.Cell(1, 9)
 	if totals.Value.(string) != "Totals" {
 		t.Errorf("unexpected cell [%v]", totals)
 	}
 
-	name, _ := s.Cell(1, 1)
+	name, _ := s.Cell(
+		keyed["Header"].Index,
+		keyed["Header"].Columns["AccountName"],
+	)
 	if name.Value.(string) != "Account" {
 		t.Errorf("unexpected cell [%v]", name)
 	}
 
-	sum, _ := s.Cell(2, 9)
+	file := excelize.NewFile()
+	s.Write(file)
+
+	sum, _ := s.Cell(
+		keyed["r2"].Index,
+		keyed["r2"].Columns["Totals"],
+	)
 	if sum.Value.(string) != "=SUM(E2:H2)" {
 		t.Errorf("unexpected formula value [%v]", sum.Value)
 	}
@@ -140,23 +156,23 @@ func TestSheetWithCostChanges(t *testing.T) {
 		{MapKey: "Service", Display: "Service"},
 		{MapKey: "2022-02", Display: "2022-02"},
 		{MapKey: "2022-03", Display: "2022-03"},
-		{MapKey: "", Display: "Increase ($)", Formula: "=(E${r}-D${r})"},
-		{MapKey: "", Display: "Increase (%)", Formula: "=(E${r}/D${r})-1"},
+		{MapKey: "Diff", Display: "Increase ($)", Formula: "=(E${r}-D${r})"},
+		{MapKey: "Percent", Display: "Increase (%)", Formula: "=(E${r}/D${r})-1"},
 	}
 
 	s := Sheet{}
 	s.Init()
 	s.SetName("testchanges")
 	s.SetColumns(headers, ColumnsAreOther)
-	s.SetDataset(data)
-	// % last column
-	percentCol := 7
-	diffCol := 6
+	keyed, _ := s.SetDataset(data)
 
 	file := excelize.NewFile()
 	s.Write(file)
 	// test the diff col matches what it should be
-	diff, _ := s.Cell(3, diffCol)
+	diff, _ := s.Cell(
+		keyed["r3"].Index,
+		keyed["r3"].Columns["Diff"],
+	)
 	expectedDiff := 103.47
 	val, _ := diff.CalculatedValue(file, s.GetName())
 	actual, _ := strconv.ParseFloat(val, 64)
@@ -165,7 +181,10 @@ func TestSheetWithCostChanges(t *testing.T) {
 	}
 
 	// test % col, should 100% increase, so 1
-	per, _ := s.Cell(3, percentCol)
+	per, _ := s.Cell(
+		keyed["r3"].Index,
+		keyed["r3"].Columns["Percent"],
+	)
 	val, _ = per.CalculatedValue(file, s.GetName())
 	expectedP := "1"
 	if val != expectedP {
@@ -248,20 +267,27 @@ func TestSheetSetDataset(t *testing.T) {
 
 	s := NewSheet("testing-set")
 	s.SetColumns(headers, ColumnsAreOther)
-	s.SetDataset(data)
+	keyed, _ := s.SetDataset(data)
 
-	c2, _ := s.Cell(2, 3)
+	c2, _ := s.Cell(
+		keyed["r2"].Index,
+		keyed["r2"].Columns["2022-01"],
+	)
 	if c2.ValueType != DataIsANumber {
 		t.Errorf("expected c2 to be a float [%v]", c2)
 	}
-	// if c2.Value.(float64) != 10.32 {
-	// 	t.Errorf("unexpected value [%v]", c2.Value)
-	// }
-	// a3 := s.cells[CellRef{Row: 3, Col: 1}]
-	// if a3.ValueType != DataIsAString {
-	// 	t.Errorf("expected to be a string [%v]", a3)
-	// }
-	// if a3.Value.(string) != "Test2" {
-	// 	t.Errorf("unexpected value [%v]", a3.Value)
-	// }
+	if c2.Value.(float64) != 10.32 {
+		t.Errorf("unexpected value [%v]", c2.Value)
+	}
+
+	a3, _ := s.Cell(
+		keyed["r3"].Index,
+		keyed["r3"].Columns["AccountName"],
+	)
+	if a3.ValueType != DataIsAString {
+		t.Errorf("expected to be a string [%v]", a3)
+	}
+	if a3.Value.(string) != "Test2" {
+		t.Errorf("unexpected value [%v]", a3.Value)
+	}
 }

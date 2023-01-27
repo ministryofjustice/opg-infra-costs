@@ -47,6 +47,11 @@ func CellValueFromType(values []string, dt ValueDataType) (value interface{}, er
 
 }
 
+// CellWriter takes a cell (CellInfo) and write to the sheet & file
+// passed
+//
+// Number & Formula (DataIsANumber/DataIsAFormula) have additional
+// handling to set cell style or cell formulas
 func CellWriter(
 	cell CellInfo,
 	sheet string,
@@ -64,47 +69,5 @@ func CellWriter(
 	} else {
 		err = f.SetCellValue(sheet, refStr, cell.Value)
 	}
-	return
-}
-
-// CellWrite takes cell refernce, a series of values and sheet data
-// and attempts to write the correct value to the correct location
-//
-// Number & Formula (DataIsANumber/DataIsAFormula) have additional
-// handling to set cell style or cell formula correctly
-func CellWrite(
-	ref string,
-	values []string,
-	sheet string,
-	rowCount int,
-	f *excelize.File,
-	style *excelize.Style) (val interface{}, dt ValueDataType, s *excelize.Style, err error) {
-
-	if len(values) <= 0 {
-		err = fmt.Errorf("values is empty, nothing to write")
-		return
-	}
-	s = style
-	dt, _ = DataType(values[0])
-	val, _ = CellValueFromType(values, dt)
-	cellstyle, _ := f.NewStyle(style)
-	// if its a number, we set the cell style first
-	if dt == DataIsANumber {
-		f.SetCellStyle(sheet, ref, ref, cellstyle)
-		err = f.SetCellValue(sheet, ref, val)
-	} else if dt == DataIsAFormula {
-		// if its a formula, create the set of replacement / sub data and
-		// update the value
-		replacements := map[string]interface{}{
-			"r": strconv.Itoa(rowCount),
-		}
-		val, err = ParseFormula(val.(string), replacements)
-		f.SetCellStyle(sheet, ref, ref, cellstyle)
-		f.SetCellFormula(sheet, ref, val.(string)[1:], excelize.FormulaOpts{})
-
-	} else {
-		err = f.SetCellValue(sheet, ref, val)
-	}
-
 	return
 }

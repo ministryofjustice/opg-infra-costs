@@ -86,10 +86,19 @@ func (s *Sheet) GetTransposeColumns() map[string]string {
 
 // SetDataset overwrites the .dataset property & then generates the
 // .cells list
-func (s *Sheet) SetDataset(ds map[string]map[string][]string) (err error) {
+func (s *Sheet) SetDataset(ds map[string]map[string][]string) (counterMap map[string]RowKeyIndexSet, err error) {
 	s.dataset = ds
-	s.headers()
-	s.rows()
+	header := s.headers()
+	rows := s.rows()
+
+	counterMap = make(map[string]RowKeyIndexSet)
+	for k, rk := range header {
+		counterMap[k] = rk
+	}
+	for k, rk := range rows {
+		counterMap[k] = rk
+	}
+
 	return
 }
 
@@ -242,31 +251,41 @@ func (s *Sheet) Init() {
 // === internal
 
 // headers generates the cell data for the current .columns
-func (s *Sheet) headers() {
+func (s *Sheet) headers() map[string]RowKeyIndexSet {
 	s.rowCount = 1
 	s.colCount = 1
+	keyToCounter := map[string]RowKeyIndexSet{}
 	// this writes the headers
+	rowKey := "Header"
+	keyToCounter[rowKey] = RowKeyIndexSet{Index: s.rowCount, Columns: map[string]int{}}
 	for _, col := range s.columns {
-		ref := CellRef{Row: s.rowCount, Col: s.colCount, RowKey: "Header"}
+		ref := CellRef{Row: s.rowCount, Col: s.colCount, RowKey: rowKey}
 		s.cells[ref] = CellInfo{Value: col.Display, Ref: ref}
+
+		keyToCounter[rowKey].Columns[col.Key()] = s.colCount
 		s.colCount++
 	}
+	return keyToCounter
 }
 
 // rows iterates over the dataset, then loops over the columns
 // get the value and writes that to the `.cells`
 // -- will parse formula values as well
-func (s *Sheet) rows() {
+func (s *Sheet) rows() map[string]RowKeyIndexSet {
+	keyToCounter := map[string]RowKeyIndexSet{}
 
 	for rowKey, row := range s.dataset {
 		s.rowCount++
 		s.colCount = 1
-
 		formulaReplacements := map[string]interface{}{
 			"r": strconv.Itoa(s.rowCount),
 		}
+		//key to index, as range over map is not consistent
+		keyToCounter[rowKey] = RowKeyIndexSet{Index: s.rowCount, Columns: map[string]int{}}
 		// now loop over the columns and fetch that data from the row
 		for _, col := range s.columns {
+			keyToCounter[rowKey].Columns[col.Key()] = s.colCount
+
 			ref := CellRef{Row: s.rowCount, Col: s.colCount, RowKey: rowKey}
 			style := s.style(s.rowCount, s.colCount)
 
@@ -294,6 +313,7 @@ func (s *Sheet) rows() {
 		}
 
 	}
+	return keyToCounter
 }
 
 // style gets the style for the row/col passed
