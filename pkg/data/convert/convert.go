@@ -3,12 +3,12 @@ package convert
 func Convert(
 	dataset []map[string]string,
 	groupColumns []string,
-	dateCostColumns map[string]string,
+	transposeColumns map[string]string,
 	otherColumns []string,
 ) (converted map[string]map[string][]string) {
 
 	// get the skeleton data set with keys and columns set for each
-	converted = Skeleton(dataset, groupColumns, dateCostColumns, otherColumns)
+	converted = Skeleton(dataset, groupColumns, transposeColumns, otherColumns)
 	for _, data := range dataset {
 		key := Key(data, groupColumns)
 		// now we look at the values and add them in
@@ -18,7 +18,7 @@ func Convert(
 			}
 		}
 		// now look at expanded columns that need to be fetched
-		for labelCol, valueCol := range dateCostColumns {
+		for labelCol, valueCol := range transposeColumns {
 			field := data[labelCol]
 			if val, ok := data[valueCol]; ok {
 				converted[key][field] = append(converted[key][field], val)

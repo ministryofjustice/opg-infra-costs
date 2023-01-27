@@ -33,6 +33,9 @@ func main() {
 		s.Write(f)
 		s.AddTable(f)
 		s.AddPane(f)
+
+		s.RowVisibility(f)
+
 		f.SetSheetVisible(s.GetName(), s.GetVisible())
 		f.SaveAs(f.Path)
 

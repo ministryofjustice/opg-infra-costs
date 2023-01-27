@@ -3,15 +3,15 @@ package convert
 func Skeleton(
 	dataset []map[string]string,
 	groupColumns []string,
-	dateCostColumns map[string]string,
+	transposeColumns map[string]string,
 	otherColumns []string,
 ) (skel map[string]map[string][]string) {
 	skel = make(map[string]map[string][]string)
 
-	// now the dateCostColumns are expanded for their values
+	// now the transposeColumns are expanded for their values
 	expanded := make(map[string]bool)
 	for _, ds := range dataset {
-		for src, _ := range dateCostColumns {
+		for src, _ := range transposeColumns {
 			if v, ok := ds[src]; ok {
 				expanded[v] = true
 			}

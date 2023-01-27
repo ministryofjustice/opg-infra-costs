@@ -10,20 +10,28 @@ type SheetInterface interface {
 	SetName(name string) error
 	GetName() string
 
+	SetVisible(v bool) error
+	GetVisible() bool
+
 	SetColumns(cols []Column, ty ColumnDataType) error
 	GetGroupColumns() []string
-	GetDateCostColumns() map[string]string
+	GetTransposeColumns() map[string]string
 	GetOtherColumns() []string
 
 	SetDataset(ds map[string]map[string][]string) error
-
-	SetVisible(v bool) error
-	GetVisible() bool
 	AddStyle(st *excelize.Style, row int, col int)
-	AddTable(f *excelize.File) error
-	AddPane(f *excelize.File) (err error)
 
-	Write(f excelize.File) error
+	SetFilterOptions(options *excelize.AutoFilterOptions) error
+	SetTableOptions(options *excelize.TableOptions) error
+
+	Write(f excelize.File) (int, error)
+
+	AddTable(f *excelize.File) error
+	AddPane(f *excelize.File) error
+
+	SetHideRowWhen(criteria map[CellRef]float64) (err error)
+	RowVisibility(f *excelize.File) (hidden []int, err error)
+
 	Cell(ref string) (CellInfo, bool)
 }
 
