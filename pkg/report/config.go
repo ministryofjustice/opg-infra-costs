@@ -59,19 +59,30 @@ func Reports(
 	exVat := map[string][]string{
 		"Org": {"($) excluding Tax"},
 	}
+	inGBP := map[string][]string{
+		"Org": {"(£) excluding Tax"},
+	}
 	k := detailedBreakdown.GetName()
-	startCol := len(pre[k]) + 1
+	noTaxStartCol := len(pre[k]) + 1
+	gbpStartCol := len(pre[name]) + 1
 	for _, d := range dateHeaders {
-		col, _ := excelize.ColumnNumberToName(startCol)
-		f := fmt.Sprintf("=SUMIF('%s'!C:C,\"<>Tax\",  '%s'!%s:%s)", k, k, col, col)
+		noTaxcol, _ := excelize.ColumnNumberToName(noTaxStartCol)
+		gbpCol, _ := excelize.ColumnNumberToName(gbpStartCol)
+		f := fmt.Sprintf("=SUMIF('%s'!C:C,\"<>Tax\",  '%s'!%s:%s)", k, k, noTaxcol, noTaxcol)
+		gbp := fmt.Sprintf("=(%s3*0.7)", gbpCol)
 		exVat[d.MapKey] = []string{f}
-		startCol++
+		inGBP[d.MapKey] = []string{gbp}
+		noTaxStartCol++
+		gbpStartCol++
 	}
 	for _, x := range post[name] {
 		exVat[x.MapKey] = []string{x.Formula}
+		inGBP[x.MapKey] = []string{x.Formula}
 	}
+	totals.AddStyle(&excelize.Style{NumFmt: 190}, 4, 0)
 	totals.AddRow("excluding-vat", exVat)
 	totals.AddCell(2, 1, "($) including Tax")
+	totals.AddRow("excluding-vat-in-gbp", inGBP)
 
 	// -- Service
 	name = "Service"
@@ -140,6 +151,8 @@ func Reports(
 	// adjust name to include the dates
 	label := fmt.Sprintf("Changes (%s - %s)", dates[0].Display, dates[1].Display)
 	costChanges := NewSheet(label)
+	// make the last column %
+	costChanges.AddStyle(&excelize.Style{NumFmt: 10}, 0, 7)
 	costChanges.SetColumns(pre[name], ColumnsAreGroupBy)
 	costChanges.SetColumns(dates, ColumnsAreDateCost)
 	costChanges.SetColumns(post[name], ColumnsAreOther)
@@ -151,8 +164,7 @@ func Reports(
 			costChanges.GetOtherColumns(),
 		),
 	)
-	// make the last column %
-	costChanges.AddStyle(&excelize.Style{NumFmt: 10}, 0, 7)
+
 	hide := map[CellRef]float64{
 		// value change of more than
 		{Col: 6}: 20,
