@@ -18,7 +18,7 @@ func TestCosts(t *testing.T) {
 		accountList := []accounts.Account{
 			{Name: "test", Id: "050256574573", Environment: "Identity", Role: "breakglass"},
 		}
-		r, _, _ := Costs(
+		r, _ := Costs(
 			accountList,
 			start,
 			end,

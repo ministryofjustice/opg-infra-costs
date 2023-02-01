@@ -1,12 +1,17 @@
-package out
+package debugger
 
 import (
 	"bytes"
 	"fmt"
+	"strconv"
 	"strings"
 	"time"
 	"unicode/utf8"
 )
+
+var outputWidth int = 100
+var durationWidth int = 12
+var gap int = 4
 
 func pad(l int, char rune) string {
 	var buffer bytes.Buffer
@@ -16,15 +21,9 @@ func pad(l int, char rune) string {
 	return buffer.String()
 }
 
-// outputs to the CLI with fixed width line
-// - if duration > 0 then it includes that in seconds to the right side
-func CLI(s string, duration time.Duration) {
-	var outputWidth = 100
-	//var buffer bytes.Buffer
-	var durationWidth = 12
-	var gap = 4
+func formatForCli(message string, duration time.Duration) string {
 	var lineWidth int = outputWidth - durationWidth - gap
-	var strChars int = utf8.RuneCountInString(s)
+	var strChars int = utf8.RuneCountInString(message)
 	var numLines int = (strChars / lineWidth) + 1
 	lines := []string{}
 
@@ -36,7 +35,7 @@ func CLI(s string, duration time.Duration) {
 		if end > strChars {
 			end = strChars
 		}
-		chunk := s[start:end] + padded
+		chunk := message[start:end] + padded
 		// if this is the first line and there is a duration, add it on
 		if line == 0 && duration > 0 {
 			// limit number of decimals
@@ -48,8 +47,23 @@ func CLI(s string, duration time.Duration) {
 		lines = append(lines, chunk)
 	}
 
-	s = strings.Join(lines, "\n")
+	return strings.Join(lines, "\n")
 
-	fmt.Println(s)
+}
 
+func Log(message string, level int) func() {
+	t := time.Now().UTC()
+	return func() {
+		p, _ := strconv.Atoi(fmt.Sprintf("%d", level))
+		p = (p / 10) - 1
+		pre := pad(p*2, ' ')
+		message = fmt.Sprintf("%s%s", pre, message)
+		str := formatForCli(message, time.Since(t))
+
+		show := (level <= LEVEL)
+		//fmt.Printf("(%v) (%v) [%v]\n", LEVEL, level, show)
+		if show {
+			fmt.Println(str)
+		}
+	}
 }

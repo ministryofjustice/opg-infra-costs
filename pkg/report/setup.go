@@ -17,9 +17,8 @@ func Reports(
 	end time.Time,
 	rawDataset []map[string]string,
 	fxFile string,
-) (sheets []Sheet, dur time.Duration) {
+) (sheets []Sheet) {
 	var name string
-	marker := time.Now().UTC()
 	fxdata := fx.Load(fxFile)
 	// generate the date headers
 	dateHeaders := []Column{}
@@ -186,7 +185,6 @@ func Reports(
 	sheets = append(sheets, detailedBreakdownWithRegion)
 	sheets = append(sheets, costChanges)
 
-	dur = time.Since(marker)
 	return
 }
 

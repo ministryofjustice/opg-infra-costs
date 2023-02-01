@@ -2,20 +2,21 @@ package accounts
 
 import (
 	"io/ioutil"
-	"time"
+	"opg-infra-costs/pkg/debugger"
 
 	"gopkg.in/yaml.v2"
 )
 
-func Load(file string) ([]Account, time.Duration, error) {
-	marker := time.Now().UTC()
+func Load(file string) ([]Account, error) {
+	defer debugger.Log("Accounts config loaded.", debugger.DETAILED)()
+
 	buf, err := ioutil.ReadFile(file)
 
 	if err != nil {
-		return nil, 0, err
+		return nil, err
 	}
 	list := &Accounts{}
 	err = yaml.Unmarshal(buf, list)
 
-	return list.Accounts, time.Since(marker), err
+	return list.Accounts, err
 }
