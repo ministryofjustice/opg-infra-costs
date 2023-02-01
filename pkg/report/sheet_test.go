@@ -199,47 +199,68 @@ func TestSheetHideRows(t *testing.T) {
 	data := map[string]map[string][]string{
 		"r1": {
 			"AccountName": []string{"Test1"},
+			"Service":     []string{"Test1"},
 			"2022-01":     []string{"11.35"},
 		},
 		"r2": {
 			"AccountName": []string{"Test2"},
+			"Service":     []string{"Test1"},
 			"2022-01":     []string{"11.37"},
 		},
 		"r3": {
 			"AccountName": []string{"Test2"},
+			"Service":     []string{"Test1"},
 			"2022-01":     []string{"-1.01"},
 		},
 		"r4": {
 			"AccountName": []string{"Test2"},
+			"Service":     []string{"Tax"},
 			"2022-01":     []string{"12.17"},
 		},
 		// the comparison is done with ABS, so this will be returned
 		"r5": {
 			"AccountName": []string{"Test2"},
+			"Service":     []string{"Test1"},
 			"2022-01":     []string{"-19.17"},
 		},
 		"r6": {
 			"AccountName": []string{"Test2"},
+			"Service":     []string{"Test1"},
 			"2022-01":     []string{"9.19"},
+		},
+		"r7": {
+			"AccountName": []string{"Test2"},
+			"Service":     []string{"Refund"},
+			"2022-01":     []string{"12.17"},
 		},
 	}
 
 	headers := []Column{
 		{MapKey: "AccountName", Display: "Account"},
+		{MapKey: "Service", Display: "Service"},
 		{MapKey: "2022-01", Display: "2022-01"},
 	}
 
 	s := NewSheet("test2")
 	s.SetColumns(headers, ColumnsAreOther)
 	s.SetDataset(data)
-	// hide rows with values less than 10
-	hide := map[CellRef]float64{{Col: 2}: 10}
-	s.SetHideRowWhen(hide)
-
 	file := excelize.NewFile()
 	s.Write(file)
-	hidden, _ := s.RowVisibility(file)
 
+	// hide rows with values less than 10
+	hide := map[CellRef]interface{}{{Col: 3}: 10}
+	s.SetHideRowWhen(hide)
+	hidden, _ := s.RowVisibility(file)
+	if len(hidden) != 2 {
+		t.Errorf("expected 2 rows to be hidden, actual [%v]", len(hidden))
+	}
+	// hide rows with values less than 10
+	hide = map[CellRef]interface{}{
+		{Col: 2, Row: 0}:  "Tax",
+		{Col: 2, Row: -1}: "Refund",
+	}
+	s.SetHideRowWhen(hide)
+	hidden, _ = s.RowVisibility(file)
 	if len(hidden) != 2 {
 		t.Errorf("expected 2 rows to be hidden, actual [%v]", len(hidden))
 	}

@@ -23,7 +23,7 @@ type Sheet struct {
 	groupColumns   []Column
 	dateColumns    []Column
 	otherColumns   []Column
-	hideRowWhen    map[CellRef]float64
+	hideRowWhen    map[CellRef]interface{}
 	rowKeyIndexMap map[string]RowKeyIndexSet
 }
 
@@ -104,7 +104,8 @@ func (s *Sheet) Write(f *excelize.File) (i int, err error) {
 	for _, cell := range s.cells {
 		err = CellWriter(cell, s.name, f)
 	}
-	s.adjustColWidth(f)
+	// this is slow call
+	// s.adjustColWidth(f)
 
 	return
 }
@@ -195,13 +196,19 @@ func (s *Sheet) SetTableOptions(options *excelize.TableOptions) (err error) {
 }
 
 // SetHideRowWhen allows configuration of how to hide certain rows
-func (s *Sheet) SetHideRowWhen(criteria map[CellRef]float64) (err error) {
+func (s *Sheet) SetHideRowWhen(criteria map[CellRef]interface{}) (err error) {
 	s.hideRowWhen = criteria
 	return
 }
 
 // RowVisibility uses hideRowWhen to hide certain rows
-// - all critera has to pass for the row to be visible
+// The row is shown by default, but is hidden if any of the criteria are true
+//   - When float64 version of the cell value is less than the (int|float64)
+//     version of the comparison the row is hidden
+//   - When the string version of the cell is an exact match to the string
+//     version of the comparison the row is also hidden
+//   - CellRef.Row is never used, so make this a 0 or lower. This allows
+//     multiple checks against same column
 func (s *Sheet) RowVisibility(f *excelize.File) (hidden []int, err error) {
 	if len(s.hideRowWhen) > 0 {
 		for i := 2; i <= s.rowCount; i++ {
@@ -214,16 +221,34 @@ func (s *Sheet) RowVisibility(f *excelize.File) (hidden []int, err error) {
 				if cellVal, _ = f.GetCellValue(s.name, cell); len(cellVal) == 0 {
 					cellVal, _ = f.CalcCellValue(s.name, cell)
 				}
+				// float parsing of the cell value
 				val, pErr := strconv.ParseFloat(cellVal, 64)
 				if pErr != nil {
 					val = 0.0
 				}
-				val = math.Abs(val)
-				greater := (val >= crit)
-				if !greater {
-					showRow = false
+
+				// For int / float comparisons - when the cell value is less than (<)
+				//	the criteria value this row will be hidden
+				// For string comparisons - when the value of the cell matches (==)
+				//	the criteria value the row will be hidden
+				switch crit.(type) {
+				case int:
+					comp := float64(crit.(int))
+					val = math.Abs(val)
+					if val < comp {
+						showRow = false
+					}
+				case float64:
+					comp := crit.(float64)
+					val = math.Abs(val)
+					if val < comp {
+						showRow = false
+					}
+				case string:
+					if cellVal == crit.(string) {
+						showRow = false
+					}
 				}
-				//fmt.Printf("[%s]\t (%.2f >= %v)\t(%v)\n", cell, val, crit, greater)
 			}
 
 			if !showRow {

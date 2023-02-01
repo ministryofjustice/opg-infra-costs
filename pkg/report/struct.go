@@ -21,7 +21,7 @@ type SheetInterface interface {
 	AddStyle(st *excelize.Style, row int, col int)
 	SetFilterOptions(options *excelize.AutoFilterOptions) error
 	SetTableOptions(options *excelize.TableOptions) error
-	SetHideRowWhen(criteria map[CellRef]float64) (err error)
+	SetHideRowWhen(criteria map[CellRef]interface{}) (err error)
 
 	SetDataset(ds map[string]map[string][]string) (mapped map[string]RowKeyIndexSet, err error)
 	AddRow(key string, cells map[string][]string) (mapped map[string]RowKeyIndexSet, err error)

@@ -1,6 +1,9 @@
 package csv
 
-import "encoding/json"
+import (
+	"encoding/json"
+	"time"
+)
 
 // Map uses json marshall to convert struct
 // over to a map
@@ -13,11 +16,12 @@ func (r Row) Map() map[string]string {
 	return mapped
 }
 
-func ToMap(items []Row) []map[string]string {
-
+func ToMap(items []Row) ([]map[string]string, time.Duration) {
+	marker := time.Now().UTC()
 	mapped := []map[string]string{}
 	for _, item := range items {
 		mapped = append(mapped, item.Map())
 	}
-	return mapped
+	dur := time.Since(marker)
+	return mapped, dur
 }

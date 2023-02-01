@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"opg-infra-costs/pkg/data/convert"
 	"opg-infra-costs/pkg/dates"
+	"opg-infra-costs/pkg/report/fx"
 	"time"
 
 	"github.com/xuri/excelize/v2"
@@ -15,12 +16,14 @@ func Reports(
 	start time.Time,
 	end time.Time,
 	rawDataset []map[string]string,
-) (sheets []Sheet) {
+	fxFile string,
+) (sheets []Sheet, dur time.Duration) {
 	var name string
-
+	marker := time.Now().UTC()
+	fxdata := fx.Load(fxFile)
 	// generate the date headers
 	dateHeaders := []Column{}
-	for _, d := range dates.Months(start, end, DATEFORMAT) {
+	for _, d := range dates.Months(start, end, dates.YM) {
 		dateHeaders = append(dateHeaders, Column{MapKey: d, Display: d})
 	}
 	pre := preDateHeaders(dateHeaders)
@@ -31,7 +34,7 @@ func Reports(
 	detailedBreakdown.SetColumns(pre[name], ColumnsAreGroupBy)
 	detailedBreakdown.SetColumns(dateHeaders, ColumnsAreDateCost)
 	detailedBreakdown.SetColumns(post[name], ColumnsAreOther)
-	detailedBreakdown.SetDataset(
+	detailedBreakdownMeta, _ := detailedBreakdown.SetDataset(
 		convert.Convert(
 			rawDataset,
 			detailedBreakdown.GetGroupColumns(),
@@ -47,7 +50,7 @@ func Reports(
 	totals.SetColumns(pre[name], ColumnsAreGroupBy)
 	totals.SetColumns(dateHeaders, ColumnsAreDateCost)
 	totals.SetColumns(post[name], ColumnsAreOther)
-	totals.SetDataset(
+	totalMeta, _ := totals.SetDataset(
 		convert.Convert(
 			totalData,
 			totals.GetGroupColumns(),
@@ -63,13 +66,13 @@ func Reports(
 		"Org": {"(£) excluding Tax"},
 	}
 	k := detailedBreakdown.GetName()
-	noTaxStartCol := len(pre[k]) + 1
-	gbpStartCol := len(pre[name]) + 1
+	noTaxStartCol := detailedBreakdownMeta["Header"].Columns["Service"] + 1 //len(pre[k]) + 1
+	gbpStartCol := totalMeta["Header"].Columns["Org"] + 1                   //len(pre[name]) + 1
 	for _, d := range dateHeaders {
 		noTaxcol, _ := excelize.ColumnNumberToName(noTaxStartCol)
 		gbpCol, _ := excelize.ColumnNumberToName(gbpStartCol)
 		f := fmt.Sprintf("=SUMIF('%s'!C:C,\"<>Tax\",  '%s'!%s:%s)", k, k, noTaxcol, noTaxcol)
-		gbp := fmt.Sprintf("=(%s3*0.7)", gbpCol)
+		gbp := fmt.Sprintf("=(%s3*%f)", gbpCol, fxdata[d.Display])
 		exVat[d.MapKey] = []string{f}
 		inGBP[d.MapKey] = []string{gbp}
 		noTaxStartCol++
@@ -136,27 +139,27 @@ func Reports(
 	name = "Cost Changes"
 	post["Cost Changes"] = []Column{
 		{
-			MapKey:  "Increase ($)",
+			MapKey:  "Increase$",
 			Display: "Increase ($)",
 			Formula: "=(E${r}-D${r})",
 		},
 		{
-			MapKey:  "Increase (%)",
+			MapKey:  "Increase%",
 			Display: "Increase (%)",
 			Formula: "=IFERROR( (E${r}/D${r})-1, 0 )",
 		},
 	}
 	// only want the last 2 months
-	dates := dateHeaders[len(dateHeaders)-2:]
+	lastTwoMonths := dateHeaders[len(dateHeaders)-2:]
 	// adjust name to include the dates
-	label := fmt.Sprintf("Changes (%s - %s)", dates[0].Display, dates[1].Display)
+	label := fmt.Sprintf("Changes (%s - %s)", lastTwoMonths[0].Display, lastTwoMonths[1].Display)
 	costChanges := NewSheet(label)
 	// make the last column %
 	costChanges.AddStyle(&excelize.Style{NumFmt: 10}, 0, 7)
 	costChanges.SetColumns(pre[name], ColumnsAreGroupBy)
-	costChanges.SetColumns(dates, ColumnsAreDateCost)
+	costChanges.SetColumns(lastTwoMonths, ColumnsAreDateCost)
 	costChanges.SetColumns(post[name], ColumnsAreOther)
-	costChanges.SetDataset(
+	costsMeta, _ := costChanges.SetDataset(
 		convert.Convert(
 			rawDataset,
 			costChanges.GetGroupColumns(),
@@ -164,12 +167,14 @@ func Reports(
 			costChanges.GetOtherColumns(),
 		),
 	)
-
-	hide := map[CellRef]float64{
-		// value change of more than
-		{Col: 6}: 20,
-		// percentage (as a decimal) change of more than
-		{Col: 7}: 0.15,
+	incValueCol := costsMeta["Header"].Columns["Increase$"]
+	serviceCol := costsMeta["Header"].Columns["Service"]
+	incPercentCol := costsMeta["Header"].Columns["Increase%"]
+	hide := map[CellRef]interface{}{
+		{Col: incValueCol}:         20,       // value change of more than
+		{Col: incPercentCol}:       0.15,     // percentage (as a decimal) change of more than
+		{Col: serviceCol, Row: 0}:  "Tax",    // exclude Tax
+		{Col: serviceCol, Row: -1}: "Refund", // exclude refunds
 	}
 	costChanges.SetHideRowWhen(hide)
 
@@ -181,6 +186,7 @@ func Reports(
 	sheets = append(sheets, detailedBreakdownWithRegion)
 	sheets = append(sheets, costChanges)
 
+	dur = time.Since(marker)
 	return
 }
 
