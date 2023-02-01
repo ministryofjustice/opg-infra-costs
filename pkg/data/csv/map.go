@@ -2,7 +2,7 @@ package csv
 
 import (
 	"encoding/json"
-	"time"
+	"opg-infra-costs/pkg/debug"
 )
 
 // Map uses json marshall to convert struct
@@ -16,12 +16,12 @@ func (r Row) Map() map[string]string {
 	return mapped
 }
 
-func ToMap(items []Row) ([]map[string]string, time.Duration) {
-	marker := time.Now().UTC()
+func ToMap(items []Row) []map[string]string {
+	defer debug.Log("Converted CSV costs to map")()
 	mapped := []map[string]string{}
 	for _, item := range items {
 		mapped = append(mapped, item.Map())
 	}
-	dur := time.Since(marker)
-	return mapped, dur
+
+	return mapped
 }

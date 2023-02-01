@@ -7,7 +7,7 @@ import (
 	"opg-infra-costs/pkg/aws/costs"
 	"opg-infra-costs/pkg/data/csv"
 	"opg-infra-costs/pkg/dates"
-	"opg-infra-costs/pkg/out"
+	"opg-infra-costs/pkg/debug"
 	"opg-infra-costs/pkg/report"
 	"time"
 
@@ -24,56 +24,42 @@ var FILES map[string]string = map[string]string{
 }
 
 func main() {
-	var duration time.Duration
+	defer debug.Log("Complete.")()
 
 	now := time.Now().UTC()
 	start := time.Date(now.Year(), now.Month()-12, 1, 0, 0, 0, 0, now.Location())
 	end := time.Date(now.Year(), now.Month(), 1, 0, 0, 0, -1, now.Location())
 
-	out.CLI(
-		fmt.Sprintf("Report period: [%s to %s]", start.Format(dates.YMD), end.Format(dates.YMD)),
-		-1)
+	accountList, _ := accounts.Load(FILES["ACCOUNTS"])
 
-	accountList, duration, _ := accounts.Load(FILES["ACCOUNTS"])
-	out.CLI("- Loaded Accounts", duration)
-
-	costUsageData, duration, _ := costs.Costs(
+	costUsageData, _ := costs.Costs(
 		accountList,
 		start,
 		end,
 	)
-	out.CLI("- Fetched cost data", duration)
 
-	duration, _ = costs.ToCSV(costUsageData, accountList, FILES["CSV"])
-	out.CLI("- Wrote cost data to csv", duration)
+	costs.ToCSV(costUsageData, accountList, FILES["CSV"])
 
-	raw, duration := csv.ToMap(csv.Load(FILES["CSV"]))
-	out.CLI("- Converted csv data to map", duration)
+	raw := csv.ToMap(csv.Load(FILES["CSV"]))
 
-	sheets, duration := report.Reports(start, end, raw, FILES["FX"])
-	out.CLI("- Converted data & created report configurations", duration)
+	sheets := report.Reports(start, end, raw, FILES["FX"])
 
 	f := excelize.NewFile()
 	f.Path = FILES["XLSX"]
 	f.SaveAs(f.Path)
 
-	marker := time.Now().UTC()
+	debug.Log("Creating worksheets")()
+	d := debug.DEPTH + 2
 	for _, s := range sheets {
+		defer debug.LogAtDepth(fmt.Sprintf("Sheet [%s] created", s.GetName()), d)()
 		s.Write(f)
 		s.AddTable(f)
 		s.AddPane(f)
 		s.RowVisibility(f)
 		f.SetSheetVisible(s.GetName(), s.GetVisible())
 		f.SaveAs(f.Path)
-		duration = time.Since(marker)
-		marker = time.Now().UTC()
-		out.CLI(fmt.Sprintf("- [%s] Worksheet saved", s.GetName()), duration)
 	}
 	f.DeleteSheet("Sheet1")
 	f.SaveAs(f.Path)
 
-	duration = time.Since(now)
-	out.CLI("", 0)
-	out.CLI("Completed.", duration)
-	out.CLI("=====", 0)
 }

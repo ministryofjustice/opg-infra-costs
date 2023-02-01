@@ -4,6 +4,7 @@ import (
 	"opg-infra-costs/pkg/aws/accounts"
 	"opg-infra-costs/pkg/data/csv"
 	"opg-infra-costs/pkg/dates"
+	"opg-infra-costs/pkg/debug"
 	"os"
 	"time"
 
@@ -18,6 +19,7 @@ func ToCSV(
 	accountList []accounts.Account,
 	file string,
 ) (dur time.Duration, err error) {
+	defer debug.Log("Wrote costs to CSV")()
 	marker := time.Now().UTC()
 	rows := []csv.Row{}
 
