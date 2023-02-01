@@ -21,8 +21,8 @@ func Costs(
 	start time.Time,
 	end time.Time,
 ) (resultsByAccountId map[string]*costexplorer.GetCostAndUsageOutput, err error) {
-	debug.Log("Getting costs")()
-	defer debug.Log("Cost data fetched")()
+	debug.Log("Getting costs", 2)()
+	defer debug.Log("Cost data fetched", 2)()
 
 	mu := &sync.Mutex{}
 	errors := []error{}
@@ -34,12 +34,11 @@ func Costs(
 	}
 
 	workerPool := workerpool.New(poolSize)
-	d := debug.DEPTH + 2
 	for _, a := range accounts {
 		account := a
 		// push the call to get costs to the worker pool
 		workerPool.Submit(func() {
-			defer debug.LogAtDepth(fmt.Sprintf("[%s] costs fetched", account.Id), d)()
+			defer debug.Log(fmt.Sprintf("[%s] costs fetched", account.Id), 3)()
 			res, err := CostsForAccount(account, start, end)
 			mu.Lock()
 			if err != nil {

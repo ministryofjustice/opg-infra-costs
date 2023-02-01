@@ -24,11 +24,13 @@ var FILES map[string]string = map[string]string{
 }
 
 func main() {
-	defer debug.Log("Complete.")()
+	defer debug.Log("Complete.", 1)()
 
 	now := time.Now().UTC()
 	start := time.Date(now.Year(), now.Month()-12, 1, 0, 0, 0, 0, now.Location())
 	end := time.Date(now.Year(), now.Month(), 1, 0, 0, 0, -1, now.Location())
+
+	debug.Log(fmt.Sprintf("Report for [%s]-[%s]", start.Format(dates.YM), end.Format(dates.YM)), 1)()
 
 	accountList, _ := accounts.Load(FILES["ACCOUNTS"])
 
@@ -48,10 +50,9 @@ func main() {
 	f.Path = FILES["XLSX"]
 	f.SaveAs(f.Path)
 
-	debug.Log("Creating worksheets")()
-	d := debug.DEPTH + 2
+	debug.Log("Creating worksheets", 2)()
 	for _, s := range sheets {
-		defer debug.LogAtDepth(fmt.Sprintf("Sheet [%s] created", s.GetName()), d)()
+		defer debug.Log(fmt.Sprintf("Sheet [%s] created", s.GetName()), 3)()
 		s.Write(f)
 		s.AddTable(f)
 		s.AddPane(f)

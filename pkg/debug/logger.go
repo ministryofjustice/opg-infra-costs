@@ -50,23 +50,12 @@ func formatForCli(message string, duration time.Duration) string {
 
 }
 
-func Log(message string) func() {
+func Log(message string, depth int) func() {
 	t := time.Now().UTC()
-	return func() {
-		DEPTH++
-		pre := pad((DEPTH)*2, ' ')
-		message = fmt.Sprintf("%s- %s", pre, message)
-		str := formatForCli(message, time.Since(t)) //+ fmt.Sprintf("[%v:%v]", DEPTH, LEVEL)
-		fmt.Println(str)
-		DEPTH--
-	}
-}
 
-func LogAtDepth(message string, depth int) func() {
-	t := time.Now().UTC()
 	return func() {
-		pre := pad((depth)*2, ' ')
-		message = fmt.Sprintf("%s- %s", pre, message)
+		pre := pad((depth-1)*2, ' ')
+		message = fmt.Sprintf("%s%s", pre, message)
 		str := formatForCli(message, time.Since(t)) //+ fmt.Sprintf("[%v:%v]", DEPTH, LEVEL)
 		fmt.Println(str)
 	}

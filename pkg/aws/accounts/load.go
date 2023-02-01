@@ -8,7 +8,7 @@ import (
 )
 
 func Load(file string) ([]Account, error) {
-	defer debug.Log("Accounts config loaded.")()
+	defer debug.Log("Accounts config loaded.", 2)()
 
 	buf, err := ioutil.ReadFile(file)
 

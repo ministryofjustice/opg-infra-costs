@@ -17,7 +17,7 @@ func (r Row) Map() map[string]string {
 }
 
 func ToMap(items []Row) []map[string]string {
-	defer debug.Log("Converted CSV costs to map")()
+	defer debug.Log("Converted CSV costs to map", 2)()
 	mapped := []map[string]string{}
 	for _, item := range items {
 		mapped = append(mapped, item.Map())

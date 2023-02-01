@@ -19,7 +19,7 @@ func ToCSV(
 	accountList []accounts.Account,
 	file string,
 ) (dur time.Duration, err error) {
-	defer debug.Log("Wrote costs to CSV")()
+	defer debug.Log("Wrote costs to CSV", 2)()
 	marker := time.Now().UTC()
 	rows := []csv.Row{}
 
