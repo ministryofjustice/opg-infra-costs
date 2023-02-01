@@ -2,13 +2,13 @@ package accounts
 
 import (
 	"io/ioutil"
-	"opg-infra-costs/pkg/debug"
+	"opg-infra-costs/pkg/debugger"
 
 	"gopkg.in/yaml.v2"
 )
 
 func Load(file string) ([]Account, error) {
-	defer debug.Log("Accounts config loaded.", 2)()
+	defer debugger.Log("Accounts config loaded.", debugger.DETAILED)()
 
 	buf, err := ioutil.ReadFile(file)
 

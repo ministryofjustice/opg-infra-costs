@@ -1,8 +1,9 @@
-package debug
+package debugger
 
 import (
 	"bytes"
 	"fmt"
+	"strconv"
 	"strings"
 	"time"
 	"unicode/utf8"
@@ -50,13 +51,19 @@ func formatForCli(message string, duration time.Duration) string {
 
 }
 
-func Log(message string, depth int) func() {
+func Log(message string, level int) func() {
 	t := time.Now().UTC()
-
 	return func() {
-		pre := pad((depth-1)*2, ' ')
+		p, _ := strconv.Atoi(fmt.Sprintf("%d", level))
+		p = (p / 10) - 1
+		pre := pad(p*2, ' ')
 		message = fmt.Sprintf("%s%s", pre, message)
-		str := formatForCli(message, time.Since(t)) //+ fmt.Sprintf("[%v:%v]", DEPTH, LEVEL)
-		fmt.Println(str)
+		str := formatForCli(message, time.Since(t))
+
+		show := (level <= LEVEL)
+		//fmt.Printf("(%v) (%v) [%v]\n", LEVEL, level, show)
+		if show {
+			fmt.Println(str)
+		}
 	}
 }

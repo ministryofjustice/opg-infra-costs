@@ -3,7 +3,7 @@ package costs
 import (
 	"fmt"
 	"opg-infra-costs/pkg/aws/accounts"
-	"opg-infra-costs/pkg/debug"
+	"opg-infra-costs/pkg/debugger"
 	"sync"
 	"time"
 
@@ -21,8 +21,8 @@ func Costs(
 	start time.Time,
 	end time.Time,
 ) (resultsByAccountId map[string]*costexplorer.GetCostAndUsageOutput, err error) {
-	debug.Log("Getting costs", 2)()
-	defer debug.Log("Cost data fetched", 2)()
+	debugger.Log("Getting costs", debugger.DETAILED)()
+	defer debugger.Log("Cost data fetched", debugger.DETAILED)()
 
 	mu := &sync.Mutex{}
 	errors := []error{}
@@ -38,7 +38,7 @@ func Costs(
 		account := a
 		// push the call to get costs to the worker pool
 		workerPool.Submit(func() {
-			defer debug.Log(fmt.Sprintf("[%s] costs fetched", account.Id), 3)()
+			defer debugger.Log(fmt.Sprintf("[%s] costs fetched", account.Id), debugger.VERBOSE)()
 			res, err := CostsForAccount(account, start, end)
 			mu.Lock()
 			if err != nil {

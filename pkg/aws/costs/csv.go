@@ -4,7 +4,7 @@ import (
 	"opg-infra-costs/pkg/aws/accounts"
 	"opg-infra-costs/pkg/data/csv"
 	"opg-infra-costs/pkg/dates"
-	"opg-infra-costs/pkg/debug"
+	"opg-infra-costs/pkg/debugger"
 	"os"
 	"time"
 
@@ -18,9 +18,9 @@ func ToCSV(
 	data map[string]*costexplorer.GetCostAndUsageOutput,
 	accountList []accounts.Account,
 	file string,
-) (dur time.Duration, err error) {
-	defer debug.Log("Wrote costs to CSV", 2)()
-	marker := time.Now().UTC()
+) (err error) {
+	defer debugger.Log("Wrote costs to CSV", debugger.DETAILED)()
+
 	rows := []csv.Row{}
 
 	for accountId, usage := range data {
@@ -56,7 +56,6 @@ func ToCSV(
 	defer f.Close()
 
 	err = gocsv.MarshalFile(&rows, f)
-	dur = time.Since(marker)
 	return
 }
 
