@@ -3,6 +3,7 @@ package report2
 import (
 	"fmt"
 	"opg-infra-costs/pkg/debugger"
+	"opg-infra-costs/pkg/utils"
 )
 
 type Sheet struct {
@@ -17,7 +18,7 @@ type Sheet struct {
 	rowCounter int
 	colCounter int
 
-	Cells []Cell
+	Cells Cells
 }
 
 func (s *Sheet) SetDataset(dataset map[string]map[string][]string) {
@@ -31,19 +32,42 @@ func (s *Sheet) SetDataset(dataset map[string]map[string][]string) {
 	// convert headings into cells
 	for _, h := range s.Headings {
 		location := Location{Row: s.rowCounter, Col: s.colCounter, Sheet: s.Key}
-		cell, err := NewCell(location, []interface{}{h.Name()})
+		cell, err := NewCell(location, []interface{}{h.Name()}, h)
 		if err == nil {
-			s.Cells = append(s.Cells, cell)
+			s.Cells.Append(cell)
 		}
 		s.colCounter++
 	}
 
 	// -- data
+
+	// now deal with the main dataset
+	for _, rowData := range dataset {
+		s.AddRow(rowData)
+	}
+	s.dataLoaded = true
+}
+
+func (s *Sheet) AddRow(row map[string][]string) int {
 	s.rowCounter++
 	s.colCounter = 1
-	// now deal with the main dataset
+	for _, h := range s.Headings {
+		var values []string = []string{"0.0"}
+		if v, ok := row[h.Key()]; ok {
+			values = v
+		}
+		location := Location{Row: s.rowCounter, Col: s.colCounter, Sheet: s.Key}
+		cell, err := NewCell(location, utils.Convert(values...), h)
+		fmt.Printf("[%s](%s)\t\t%v\n", location.String(), h.Name(), cell.Value())
+		if err == nil {
+			s.Cells.Append(cell)
+		}
 
-	s.dataLoaded = true
+		s.colCounter++
+	}
+
+	fmt.Println()
+	return s.rowCounter
 }
 
 // -- New

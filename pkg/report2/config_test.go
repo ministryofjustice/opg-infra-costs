@@ -81,9 +81,7 @@ column_definitions:
   FormulaTrend:
     name: FormulaTrend
     display: Trend
-    formula: >-
-      =SPARKLINE($${transposeStart}{row}:$${transposeEnd}{row},
-      "{"charttype","column";"empty","ignore";"nan","convert"}")
+    formula: '=SPARKLINE($${transposeStart}{row}:$${transposeEnd}{row}, "{"charttype","column";"empty","ignore";"nan","convert"}")'
   FormulaIncrease$:
     name: FormulaIncrease$
     display: Increase ($)
@@ -109,8 +107,7 @@ column_definitions:
   FormulaYearlyCostsNoTax:
     name: FormulaYearlyCostsNoTax
     display: no tax
-    formula: >-
-      =SUMIF('{dDetailedBreakdown}'!{dDetailedBreakdown}{Col:Service},"<>Tax", '{dDetailedBreakdown}'!{col}:{col})
+    formula: "=SUMIF('{dDetailedBreakdown}'!{dDetailedBreakdown}{Col:Service},\"<>Tax\", '{dDetailedBreakdown}'!{col}:{col})"
     col_style: 177
     month_range:
       start: -12

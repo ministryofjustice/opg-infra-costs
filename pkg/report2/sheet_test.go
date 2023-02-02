@@ -43,13 +43,16 @@ var simpleDataset = map[string]map[string][]string{
 func TestNewSheet(t *testing.T) {
 
 	cfg, _ := unmarshalConfig([]byte(dummyCfg))
-	key := "dTotals"
+	key := "dDetailedBreakdown"
 	report := cfg.Reports[key]
 	s := NewSheet(key, key, report, &cfg)
 
+	SHEETDATAMAP = map[string]string{}
+
 	s.SetDataset(simpleDataset)
 
-	// pp.Println(s.Cells)
+	//row := s.Cells.Row(2)
+	//pp.Println(s.Headings)
 
-	// pp.Println(SHEETDATAMAP)
+	//pp.Println(SHEETDATAMAP)
 }

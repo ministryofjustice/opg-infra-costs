@@ -97,8 +97,10 @@ func setDataMapHeadings(sheetKey string, headings []Column) {
 	if transposeStart > 0 && transposeEnd > transposeStart {
 		tS := fmt.Sprintf("{%s}%s", sheetKey, _transposeStart)
 		tE := fmt.Sprintf("{%s}%s", sheetKey, _transposeEnd)
-		SHEETDATAMAP[tS] = strconv.Itoa(transposeStart)
-		SHEETDATAMAP[tE] = strconv.Itoa(transposeEnd)
+		st, _ := excelize.ColumnNumberToName(transposeStart)
+		et, _ := excelize.ColumnNumberToName(transposeEnd)
+		SHEETDATAMAP[tS] = st
+		SHEETDATAMAP[tE] = et
 	}
 
 }
