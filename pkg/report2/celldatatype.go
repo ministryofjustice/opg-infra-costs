@@ -3,6 +3,7 @@ package report2
 import (
 	"fmt"
 	"opg-infra-costs/pkg/dates"
+	"opg-infra-costs/pkg/debugger"
 	"strconv"
 	"time"
 )
@@ -28,6 +29,7 @@ type CellDataType struct {
 // into a single value
 //   - For CellDataIsNumber this is a sum
 func (cdt *CellDataType) Value() (value interface{}) {
+	defer debugger.Log("CellDataType.Value()", debugger.VVERBOSE)()
 	if len(cdt.Values) > 0 {
 		if cdt.Type == CellDataIsNumber {
 			// If this is a number we run a sum on all the contents
@@ -57,6 +59,7 @@ func (cdt *CellDataType) Value() (value interface{}) {
 //   - Type match order - int, float, string might be float, string might be int, string might be
 //     date, string might be a formula
 func CellDataTypeFromValues(values []interface{}) (cellDataType CellDataType, err error) {
+	defer debugger.Log("CellDataTypeFromValues", debugger.VVERBOSE)()
 	if len(values) > 0 {
 		cellDataType.Values = values
 		value := values[0]

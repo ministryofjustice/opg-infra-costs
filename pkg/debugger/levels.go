@@ -7,6 +7,7 @@ const (
 	INFO     int = 10
 	DETAILED int = 20
 	VERBOSE  int = 30
+	VVERBOSE int = 40
 	ALL      int = 900
 )
 

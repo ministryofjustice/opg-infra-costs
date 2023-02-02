@@ -58,7 +58,7 @@ func TestCellDataTypeValue(t *testing.T) {
 		t.Errorf("expected [%v], actual [%v]", expectedF, valueF)
 	}
 	// set a sub and try again
-	SUBSTITUTIONS["{TST}{name}"] = "TEST WORKED"
+	SHEETDATAMAP["{TST}{name}"] = "TEST WORKED"
 	valueF = dtFormulas.Value()
 	expectedF = "=SUM(TEST WORKED)"
 	if valueF.(string) != expectedF {
