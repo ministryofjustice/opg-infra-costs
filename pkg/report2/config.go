@@ -25,6 +25,7 @@ type Configuration struct {
 
 // unmarshalConfig handles converting the yaml to a struct
 func unmarshalConfig(content []byte) (cfg Configuration, err error) {
+	defer debugger.Log("unmarshalConfig.", debugger.VVERBOSE)()
 	cfg = Configuration{}
 	err = yaml.Unmarshal(content, &cfg)
 	return

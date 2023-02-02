@@ -1,5 +1,7 @@
 package report2
 
+import "opg-infra-costs/pkg/debugger"
+
 // Column is used to define where and how data in cells comes from
 //   - Does not require dataset loading, just config
 //   - SourceColumn maps to the csv row field name
@@ -15,6 +17,7 @@ type Column struct {
 
 // Key returns the value to use as a key against the csv data row
 func (col *Column) Key() (key string) {
+	defer debugger.Log("Column.Key()", debugger.VVERBOSE)()
 	if len(col.SourceColumn) > 0 {
 		key = col.SourceColumn
 	} else if len(col.Display) > 0 {
@@ -34,6 +37,7 @@ func (col *Column) Key() (key string) {
 //   - Defintiion styling information is not used here, but definitions
 //     are attached for later user
 func NewColumnsFromDefinition(definition ColumnDefinition) (cols []Column) {
+	defer debugger.Log("NewColumnsFromDefinition()", debugger.VVERBOSE)()
 	// if this is a transposed column, we need to generate multiple columns
 	if definition.IsTransposed() {
 		// create a column for each month in the transposed range
