@@ -7,7 +7,7 @@ import (
 
 type ReportConfiguration struct {
 	Name            string            `yaml:"name"`
-	Visible         bool              `yaml:"visible,omitempty"`
+	Visible         bool              `default:"true" yaml:"visible,omitempty"`
 	ColumnsByName   []string          `yaml:"columns"`
 	ExtraRowsByName []string          `yaml:"extra_rows,omitempty"`
 	CellOverwrites  map[string]string `yaml:"overwrite_cells,omitempty"`

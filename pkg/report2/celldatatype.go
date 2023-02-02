@@ -29,7 +29,9 @@ type CellDataType struct {
 // Value handles covnerting set of string values for the cell
 // into a single value
 //   - For CellDataIsNumber this is a sum
-func (cdt *CellDataType) Value() (value interface{}) {
+//   - called from Cell.Value()
+//   - needs the cell location to handle formula string replacements
+func (cdt *CellDataType) Value(location Location) (value interface{}) {
 	defer debugger.Log("CellDataType.Value()", debugger.VVERBOSE)()
 	if len(cdt.Values) > 0 {
 		if cdt.Type == CellDataIsNumber {
@@ -43,7 +45,7 @@ func (cdt *CellDataType) Value() (value interface{}) {
 
 		} else if cdt.Type == CellDataIsFormula {
 			// If this is a formula, that parse out the values
-			value = Substitute(cdt.Values[0].(string))
+			value = Substitute(location, cdt.Values[0].(string))
 		} else {
 			value = cdt.Values[0]
 		}

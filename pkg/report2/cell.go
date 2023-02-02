@@ -4,17 +4,17 @@ import "opg-infra-costs/pkg/debugger"
 
 type Cell struct {
 	DataType CellDataType
-	Location CellLocation
+	Location Location
 }
 
 func (c *Cell) Value() interface{} {
 	defer debugger.Log("Cell.Value()", debugger.VVERBOSE)()
-	return c.DataType.Value()
+	return c.DataType.Value(c.Location)
 }
 
 // -- Create a new cell
 func NewCell(
-	location CellLocation,
+	location Location,
 	values []interface{},
 ) (cell Cell, err error) {
 	defer debugger.Log("NewCell()", debugger.VVERBOSE)()

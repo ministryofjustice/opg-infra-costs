@@ -34,17 +34,17 @@ func TestCellDataTypeFromValues(t *testing.T) {
 }
 
 func TestCellDataTypeValue(t *testing.T) {
-
+	location := Location{Sheet: "test"}
 	// -- numbers should be a sum
 	dtNum, _ := CellDataTypeFromValues(tnumbers)
-	value := dtNum.Value()
+	value := dtNum.Value(location)
 	expected := 114.47
 	if value.(float64) != expected {
 		t.Errorf("expected [%v], actual [%v]", expected, value)
 	}
 
 	dtDates, _ := CellDataTypeFromValues(tdates)
-	valueD := dtDates.Value()
+	valueD := dtDates.Value(location)
 	expectedD := tdates[0]
 	if valueD.(string) != expectedD {
 		t.Errorf("expected [%v], actual [%v]", expectedD, valueD)
@@ -52,14 +52,14 @@ func TestCellDataTypeValue(t *testing.T) {
 
 	dtFormulas, _ := CellDataTypeFromValues(tformulas)
 	// -- this an exact match on the formula with out subs
-	valueF := dtFormulas.Value()
+	valueF := dtFormulas.Value(location)
 	expectedF := tformulas[0]
 	if valueF.(string) != expectedF {
 		t.Errorf("expected [%v], actual [%v]", expectedF, valueF)
 	}
 	// set a sub and try again
 	SHEETDATAMAP["{TST}{name}"] = "TEST WORKED"
-	valueF = dtFormulas.Value()
+	valueF = dtFormulas.Value(location)
 	expectedF = "=SUM(TEST WORKED)"
 	if valueF.(string) != expectedF {
 		t.Errorf("expected [%v], actual [%v]", expectedF, valueF)

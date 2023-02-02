@@ -2,9 +2,18 @@ package report2
 
 import (
 	"testing"
-
-	"github.com/k0kubun/pp"
 )
+
+func TestSetReportName(t *testing.T) {
+	name := "test sheet"
+	key := "testSheet"
+	setDataMapReportName(key, name)
+	actual, _ := getDataMapReportName(key)
+	if actual != name {
+		t.Errorf("expected report to be called [%v], actual [%v]", name, actual)
+	}
+
+}
 
 func TestSetGetDataMapHeadings(t *testing.T) {
 	var err error
@@ -56,5 +65,4 @@ func TestSetGetNumFmts(t *testing.T) {
 		t.Errorf("expected numfmt to be [%v], actual [%v]", expected, actual)
 	}
 
-	pp.Println(COLNUMBERFORMATS)
 }

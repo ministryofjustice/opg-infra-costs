@@ -36,7 +36,7 @@ reports:
       - ExcludeTax
       - To£
     overwrite_cells:
-      '${Col:Org}2': ($) inc. Tax
+      '{Totals}{Col:Org}2': ($) inc. Tax
 extra_row_definitions:
   ExcludeTax:
     name: ExcludeTax
@@ -76,23 +76,23 @@ column_definitions:
   FormulaTotals:
     name: FormulaTotals
     display: Totals
-    formula: '=SUM(${transposeStart}${row}:${transposeEnd}${row})'
+    formula: '=SUM($${transposeStart}{row}:$${transposeEnd}{row})'
     col_style: 177
   FormulaTrend:
     name: FormulaTrend
     display: Trend
     formula: >-
-      =SPARKLINE(${transposeStart}${row}:${transposeEnd}${row},
+      =SPARKLINE($${transposeStart}{row}:$${transposeEnd}{row},
       "{"charttype","column";"empty","ignore";"nan","convert"}")
   FormulaIncrease$:
     name: FormulaIncrease$
     display: Increase ($)
-    formula: '=(${transposeEnd}${row}-${transposeEnd}${row})'
+    formula: '=($${transposeEnd}{row}-$${transposeEnd}{row})'
     col_style: 177
   FormulaIncrease%:
     name: FormulaIncrease%
     display: Increase (%)
-    formula: '=IFERROR( (${transposeEnd}${row}/${transposeEnd}${row})-1, 0 )'
+    formula: '=IFERROR( ($${transposeEnd}{row}/$${transposeEnd}{row})-1, 0 )'
     col_style: 10
   TransposeCosts:
     name: TransposeCosts
@@ -110,8 +110,7 @@ column_definitions:
     name: FormulaYearlyCostsNoTax
     display: no tax
     formula: >-
-      =SUMIF('${DetailedBreakdown}{name}'!${DetailedBreakdown}{Col:Service},"<>Tax",
-      '${DetailedBreakdown}{name}'!${col}:${col})
+      =SUMIF('{DetailedBreakdown}'!{DetailedBreakdown}{Col:Service},"<>Tax", '{DetailedBreakdown}'!{col}:{col})
     col_style: 177
     month_range:
       start: -12
@@ -119,8 +118,9 @@ column_definitions:
   FormulaYearlyCostsGBP:
     name: FormulaYearlyCostsGBP
     display: no tax
-    formula: '=(${col}${row-1}*0.7)'
+    formula: '=({col}{row-1}*0.7)'
     col_style: 190
+
 `
 
 func TestUnmarshalContent(t *testing.T) {

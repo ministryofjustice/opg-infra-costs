@@ -28,6 +28,18 @@ func (col *Column) Key() (key string) {
 	return
 }
 
+func (col *Column) Name() (name string) {
+	defer debugger.Log("Column.Name()", debugger.VVERBOSE)()
+	if len(col.Display) > 0 {
+		name = col.Display
+	} else if len(col.SourceColumn) > 0 {
+		name = col.SourceColumn
+	} else {
+		name = ""
+	}
+	return
+}
+
 // -- New / Create methods
 
 // NewColumnsFromDefinition uses the definition to generate a `[]Column`.
