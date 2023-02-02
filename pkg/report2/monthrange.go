@@ -6,8 +6,8 @@ import (
 )
 
 type MonthRange struct {
-	MonthsAgoStart int
-	MonthsAgoEnd   int
+	MonthsAgoStart int `yaml:"start"`
+	MonthsAgoEnd   int `yaml:"end"`
 }
 
 func (mr *MonthRange) Months() []string {
@@ -16,4 +16,16 @@ func (mr *MonthRange) Months() []string {
 	start = start.AddDate(0, mr.MonthsAgoStart, 0)
 	end := now.AddDate(0, mr.MonthsAgoEnd, 0)
 	return dates.Months(start, end, dates.YM)
+}
+
+// IsNil checks that the range information is set to a
+// valid number (non-zero)
+//   - Used in loading from yaml to check if transpose data
+//     is real of defaults
+func (mr *MonthRange) Nil() (isNil bool) {
+	isNil = true
+	if mr.MonthsAgoEnd != 0 && mr.MonthsAgoStart != 0 {
+		isNil = false
+	}
+	return
 }
