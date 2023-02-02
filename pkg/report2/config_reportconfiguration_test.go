@@ -36,3 +36,36 @@ func TestConfigReportHeadings(t *testing.T) {
 	}
 
 }
+
+func TestConfigReportSetHeadings(t *testing.T) {
+	var err error
+
+	cfg, _ := unmarshalConfig([]byte(dummyCfg))
+	sheet := "DetailedBreakdown"
+	reportCfg := cfg.Reports[sheet]
+	colDefs, _ := reportCfg.ColumnNamesToDefinitions(cfg.ColumnDefinitions)
+
+	headings, err := reportCfg.Headings(colDefs)
+	if err != nil {
+		t.Errorf("unexpected error [%v]", err)
+	}
+	setDataMapHeadings(sheet, headings)
+	expected := 1
+	actual, _, err := getDataMapHeading(sheet, "AccountName")
+	if err != nil {
+		t.Errorf("unexpected error [%v]", err)
+	}
+	if actual != expected {
+		t.Errorf("expected column to be mapped as [%v], actual [%v]", expected, actual)
+	}
+
+	expectedL := "B"
+	_, actualL, err := getDataMapHeading(sheet, "AccountEnvironment")
+	if err != nil {
+		t.Errorf("unexpected error [%v]", err)
+	}
+	if actualL != expectedL {
+		t.Errorf("expected column to be mapped as [%v], actual [%v]", expectedL, actual)
+	}
+
+}

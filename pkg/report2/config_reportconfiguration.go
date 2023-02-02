@@ -14,6 +14,7 @@ type ReportConfiguration struct {
 }
 
 // ColumnNamesToDefinitions finds all the definitions from this reports `ColumnsByName` value
+//   - does not require dataset to be loaded
 //   - used to find only this reports definitions and not the full set
 func (r *ReportConfiguration) ColumnNamesToDefinitions(definitions map[string]ColumnDefinition) (found map[string]ColumnDefinition, err error) {
 	defer debugger.Log("ReportConfiguration.ColumnNamesToDefinitions()", debugger.VVERBOSE)()
@@ -31,6 +32,7 @@ func (r *ReportConfiguration) ColumnNamesToDefinitions(definitions map[string]Co
 
 // Headings uses `ColumnsByName` and the definition data to create all
 // the headings
+//   - does not require dataset to be loaded
 //   - this handles transposing date ranges into columns
 //   - does not do any value subsitutions
 func (r *ReportConfiguration) Headings(definitions map[string]ColumnDefinition) (headings []Column, err error) {

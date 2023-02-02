@@ -8,6 +8,7 @@ import (
 	"time"
 )
 
+// -- Errors
 const (
 	CellDataTypeErrorEmpty   string = "param `values` is empty"
 	CellDataTypeErrorNoMatch string = "unable to match data type of [%v]"

@@ -12,7 +12,7 @@ type Column struct {
 	SourceColumn string
 	Display      string
 	Formula      string
-	Definition   *ColumnDefinition
+	Definition   ColumnDefinition
 }
 
 // Key returns the value to use as a key against the csv data row
@@ -46,7 +46,7 @@ func NewColumnsFromDefinition(definition ColumnDefinition) (cols []Column) {
 				SourceColumn: m,
 				Display:      m,
 				Formula:      definition.Formula,
-				Definition:   &definition,
+				Definition:   definition,
 			}
 			cols = append(cols, c)
 		}
@@ -55,7 +55,7 @@ func NewColumnsFromDefinition(definition ColumnDefinition) (cols []Column) {
 			SourceColumn: definition.SourceColumn,
 			Display:      definition.Display,
 			Formula:      definition.Formula,
-			Definition:   &definition,
+			Definition:   definition,
 		}
 		cols = append(cols, c)
 	}
