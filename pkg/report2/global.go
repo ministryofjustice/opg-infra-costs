@@ -53,11 +53,18 @@ const (
 	_headingPrefix string = "Col"
 )
 
+func _reset() {
+	SHEETDATAMAP = map[string]string{}
+	ROWNUMBERFORMATS = map[string]int{}
+	COLNUMBERFORMATS = map[string]int{}
+	CELLNUMBERFORMATS = map[string]int{}
+}
+
 // setDataMapReportName tracks the name of this sheet via a
 // easier string for formula parsing (so "Cost Changes" => {CostChanges})
 func setDataMapReportName(sheetKey string, sheetName string) {
 	defer debugger.Log("setDataMapReportName", debugger.VVERBOSE)()
-	key := fmt.Sprintf("{%s}", sheetKey)
+	key := fmt.Sprintf("{%s}{name}", sheetKey)
 	SHEETDATAMAP[key] = sheetName
 }
 
@@ -89,7 +96,8 @@ func setDataMapHeadings(sheetKey string, headings []Column) {
 
 		if h.Definition.IsTransposed() && transposeStart == 0 {
 			transposeStart = col
-		} else if h.Definition.IsTransposed() && transposeStart > 0 {
+		}
+		if h.Definition.IsTransposed() && transposeStart > 0 {
 			transposeEnd = col
 		}
 	}
@@ -150,7 +158,11 @@ func getColumnNumberFormat(sheetKey string, headingName string) (format int, err
 func Substitute(location Location, original string) (updated string) {
 	defer debugger.Log("Substitute", debugger.VVERBOSE)()
 	// replace $ within the original to become the sheet name
-	updated = strings.ReplaceAll(original, _currentSheet, fmt.Sprintf("{%s}", location.Sheet))
+	updated = strings.ReplaceAll(
+		original,
+		_currentSheet,
+		fmt.Sprintf("{%s}", location.Sheet),
+	)
 	// handle keywords that relate the position of the cell (row/col etc)
 	updated = strings.ReplaceAll(updated, _previousRow, strconv.Itoa(location.Row-1))
 	updated = strings.ReplaceAll(updated, _currentRow, strconv.Itoa(location.Row))

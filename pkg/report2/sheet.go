@@ -58,7 +58,8 @@ func (s *Sheet) AddRow(row map[string][]string) int {
 		}
 		location := Location{Row: s.rowCounter, Col: s.colCounter, Sheet: s.Key}
 		cell, err := NewCell(location, utils.Convert(values...), h)
-		fmt.Printf("[%s](%s)\t\t%v\n", location.String(), h.Name(), cell.Value())
+		// fmt.Printf("[%s](%s)\t\t%v\n", location.String(), h.Name(), cell.Value())
+
 		if err == nil {
 			s.Cells.Append(cell)
 		}

@@ -3,6 +3,7 @@ package report2
 import "testing"
 
 func TestLocation(t *testing.T) {
+	defer _reset()
 	var location Location
 	var expected, actual string
 

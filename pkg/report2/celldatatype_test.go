@@ -10,6 +10,7 @@ var tdates []interface{} = []interface{}{"2022-01", "2022-03", "2022-10"}
 var tformulas []interface{} = []interface{}{"=SUM({TST}{name})"}
 
 func TestCellDataTypeFromValues(t *testing.T) {
+	defer _reset()
 
 	dtNum, _ := CellDataTypeFromValues(tnumbers)
 	if dtNum.Type != CellDataIsNumber {
@@ -34,6 +35,7 @@ func TestCellDataTypeFromValues(t *testing.T) {
 }
 
 func TestCellDataTypeValue(t *testing.T) {
+	defer _reset()
 	location := Location{Sheet: "test"}
 	// -- numbers should be a sum
 	dtNum, _ := CellDataTypeFromValues(tnumbers)
@@ -64,5 +66,4 @@ func TestCellDataTypeValue(t *testing.T) {
 	if valueF.(string) != expectedF {
 		t.Errorf("expected [%v], actual [%v]", expectedF, valueF)
 	}
-
 }

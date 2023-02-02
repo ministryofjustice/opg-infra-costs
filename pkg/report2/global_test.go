@@ -5,6 +5,7 @@ import (
 )
 
 func TestSetReportName(t *testing.T) {
+	defer _reset()
 	name := "test sheet"
 	key := "testSheet"
 	setDataMapReportName(key, name)
@@ -16,6 +17,7 @@ func TestSetReportName(t *testing.T) {
 }
 
 func TestSetGetDataMapHeadings(t *testing.T) {
+	defer _reset()
 	var err error
 	sheet := "test-map-headings"
 	headings := []Column{
@@ -45,6 +47,7 @@ func TestSetGetDataMapHeadings(t *testing.T) {
 }
 
 func TestSetGetNumFmts(t *testing.T) {
+	defer _reset()
 	var err error
 	sheet := "test-map-headings"
 	def := ColumnDefinition{Style: 10}

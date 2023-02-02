@@ -5,6 +5,7 @@ import (
 )
 
 func TestConfigReportHeadings(t *testing.T) {
+	defer _reset()
 	var cfg Configuration
 	var reportCfg ReportConfiguration
 	var colDefs map[string]ColumnDefinition
@@ -39,6 +40,7 @@ func TestConfigReportHeadings(t *testing.T) {
 }
 
 func TestConfigReportSetHeadings(t *testing.T) {
+	defer _reset()
 	var err error
 
 	cfg, _ := unmarshalConfig([]byte(dummyCfg))

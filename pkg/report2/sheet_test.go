@@ -1,7 +1,11 @@
 package report2
 
 import (
+	"opg-infra-costs/pkg/debugger"
+	"os"
 	"testing"
+
+	"github.com/k0kubun/pp"
 )
 
 var simpleDataset = map[string]map[string][]string{
@@ -41,18 +45,25 @@ var simpleDataset = map[string]map[string][]string{
 }
 
 func TestNewSheet(t *testing.T) {
-
+	defer _reset()
 	cfg, _ := unmarshalConfig([]byte(dummyCfg))
 	key := "dDetailedBreakdown"
 	report := cfg.Reports[key]
-	s := NewSheet(key, key, report, &cfg)
-
-	SHEETDATAMAP = map[string]string{}
+	s := NewSheet("Detailed Breakdown", key, report, &cfg)
 
 	s.SetDataset(simpleDataset)
 
 	//row := s.Cells.Row(2)
 	//pp.Println(s.Headings)
 
-	//pp.Println(SHEETDATAMAP)
+	pp.Println(SHEETDATAMAP)
+
+}
+
+func TestMain(m *testing.M) {
+	debugger.LEVEL = debugger.ERR
+	_reset()
+	code := m.Run()
+	_reset()
+	os.Exit(code)
 }
