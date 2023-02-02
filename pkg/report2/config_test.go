@@ -6,7 +6,7 @@ import (
 
 var dummyCfg = `
 reports:
-  CostChanges:
+  dCostChanges:
     name: Cost Changes
     columns:
       - AccountName
@@ -15,7 +15,7 @@ reports:
       - TransposeCostChanges
       - FormulaIncrease$
       - FormulaIncrease%
-  DetailedBreakdown:
+  dDetailedBreakdown:
     name: Detailed Breakdown
     columns:
       - AccountName
@@ -24,7 +24,7 @@ reports:
       - TransposeCosts
       - FormulaTotals
       - FormulaTrend
-  Totals:
+  dTotals:
     name: Totals
     visible: false
     columns:
@@ -110,7 +110,7 @@ column_definitions:
     name: FormulaYearlyCostsNoTax
     display: no tax
     formula: >-
-      =SUMIF('{DetailedBreakdown}'!{DetailedBreakdown}{Col:Service},"<>Tax", '{DetailedBreakdown}'!{col}:{col})
+      =SUMIF('{dDetailedBreakdown}'!{dDetailedBreakdown}{Col:Service},"<>Tax", '{dDetailedBreakdown}'!{col}:{col})
     col_style: 177
     month_range:
       start: -12

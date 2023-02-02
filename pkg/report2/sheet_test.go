@@ -2,8 +2,6 @@ package report2
 
 import (
 	"testing"
-
-	"github.com/k0kubun/pp"
 )
 
 var simpleDataset = map[string]map[string][]string{
@@ -45,13 +43,13 @@ var simpleDataset = map[string]map[string][]string{
 func TestNewSheet(t *testing.T) {
 
 	cfg, _ := unmarshalConfig([]byte(dummyCfg))
-	key := "Totals"
+	key := "dTotals"
 	report := cfg.Reports[key]
 	s := NewSheet(key, key, report, &cfg)
 
 	s.SetDataset(simpleDataset)
 
-	pp.Println(s.Cells)
+	// pp.Println(s.Cells)
 
-	pp.Println(SHEETDATAMAP)
+	// pp.Println(SHEETDATAMAP)
 }

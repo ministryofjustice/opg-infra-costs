@@ -10,13 +10,14 @@ func TestConfigReportHeadings(t *testing.T) {
 	var colDefs map[string]ColumnDefinition
 	var err error
 
+	nm := "dDetailedBreakdown"
 	cfg, _ = unmarshalConfig([]byte(dummyCfg))
-	reportCfg = cfg.Reports["DetailedBreakdown"]
+	reportCfg = cfg.Reports[nm]
 	colDefs, _ = reportCfg.ColumnNamesToDefinitions(cfg.ColumnDefinitions)
 
 	// detailed breakdown is standard version, should have simple
 	// transpose count to test
-	reportCfg = cfg.Reports["DetailedBreakdown"]
+	reportCfg = cfg.Reports[nm]
 	extraCols := 0
 	transposed := 0
 	for _, tCol := range Transposed(colDefs) {
@@ -41,7 +42,7 @@ func TestConfigReportSetHeadings(t *testing.T) {
 	var err error
 
 	cfg, _ := unmarshalConfig([]byte(dummyCfg))
-	sheet := "DetailedBreakdown"
+	sheet := "dDetailedBreakdown"
 	reportCfg := cfg.Reports[sheet]
 	colDefs, _ := reportCfg.ColumnNamesToDefinitions(cfg.ColumnDefinitions)
 
