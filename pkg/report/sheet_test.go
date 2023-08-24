@@ -60,6 +60,7 @@ func TestSheetWithFormula(t *testing.T) {
 	data := map[string]map[string][]string{
 		"r2": {
 			"AccountName":        []string{"Test1"},
+			"AccountId":          []string{"12309817212"},
 			"AccountEnvironment": []string{"Production", "Production"},
 			"Service":            []string{"Servce 1", "Service 1"},
 			"2022-01":            []string{"11.35"},
@@ -67,6 +68,7 @@ func TestSheetWithFormula(t *testing.T) {
 		},
 		"r3": {
 			"AccountName":        []string{"Test1"},
+			"AccountId":          []string{"12309817212"},
 			"AccountEnvironment": []string{"Production", "Production"},
 			"Service":            []string{"Servce 2", "Service 2"},
 			"2022-01":            []string{"101.12", "-10.11"},
@@ -76,6 +78,7 @@ func TestSheetWithFormula(t *testing.T) {
 
 	headers := []Column{
 		{MapKey: "AccountName", Display: "Account"},
+		{MapKey: "AccountId", Display: "AccountId", ForceColumnToDisplayAsString: true},
 		{MapKey: "AccountEnvironment", Display: "Environment"},
 		{MapKey: "Service", Display: "Service"},
 		{MapKey: "Region", Display: "Region"},
@@ -129,6 +132,12 @@ func TestSheetWithFormula(t *testing.T) {
 
 	if actual != expected {
 		t.Errorf("expected total to be [%v], recieved [%v]", expected, actual)
+	}
+
+	// test to make sure account id comes out as a string for excel
+	tc, _ := s.Cell(keyed["r2"].Index, keyed["r2"].Columns["AccountId"])
+	if tc.Value != `"12309817212"` {
+		t.Errorf("expected account id to be a string encapsulated version, recieved something else")
 	}
 
 }

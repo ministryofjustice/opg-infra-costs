@@ -22,6 +22,7 @@ func TestCosts(t *testing.T) {
 			accountList,
 			start,
 			end,
+			false,
 		)
 
 		f, _ := os.CreateTemp(project.ROOT_DIR+"/files/", "*-test.csv")

@@ -40,6 +40,8 @@ type Column struct {
 	MapKey  string
 	Display string
 	Formula string
+
+	ForceColumnToDisplayAsString bool
 }
 type ColumnDataType string
 

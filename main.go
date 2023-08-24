@@ -9,10 +9,24 @@ import (
 	"opg-infra-costs/pkg/dates"
 	"opg-infra-costs/pkg/debugger"
 	"opg-infra-costs/pkg/report"
+	"os"
+	"strings"
 	"time"
 
 	"github.com/xuri/excelize/v2"
 )
+
+func excludeTax() (excludeTax bool) {
+	excludeTax = false
+
+	args := os.Args
+	for _, v := range args {
+		if strings.Contains(v, "no-tax") {
+			excludeTax = true
+		}
+	}
+	return
+}
 
 // -- Date handling
 
@@ -39,6 +53,7 @@ func main() {
 		accountList,
 		start,
 		end,
+		excludeTax(),
 	)
 
 	costs.ToCSV(costUsageData, accountList, FILES["CSV"])

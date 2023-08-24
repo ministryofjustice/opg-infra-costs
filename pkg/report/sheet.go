@@ -131,7 +131,7 @@ func (s *Sheet) GetVisible() bool {
 	return s.visible
 }
 
-// AddStyle provides a way to overwrite the defauly cell style
+// AddStyle provides a way to overwrite the default cell style
 // for any content based on the row/col location
 // By setting just row or col you can set the style for that entire section
 // - https://xuri.me/excelize/en/style.html#number_format

@@ -89,7 +89,9 @@ func (c *CellInfo) SetValue(
 	val := values[0]
 	c.ValueType, _ = DataType(val)
 
-	if c.ValueType == DataIsAFormula {
+	if columnHeader.ForceColumnToDisplayAsString {
+		value = fmt.Sprintf(`"%v"`, val)
+	} else if c.ValueType == DataIsAFormula {
 		value, _ = ParseFormula(val, formulaReplacements)
 	} else {
 		value, _ = CellValueFromType(values, c.ValueType)

@@ -30,10 +30,22 @@ var costExplorerInput = &costexplorer.GetCostAndUsageInput{
 	},
 }
 
+// this should remove tax from the api calls
+var costTaxFilter = &costexplorer.Expression{
+	Not: &costexplorer.Expression{
+		Dimensions: &costexplorer.DimensionValues{
+			Key:          aws.String("SERVICE"),
+			Values:       []*string{aws.String("Tax")},
+			MatchOptions: []*string{aws.String("EQUALS")},
+		},
+	},
+}
+
 func CostsForAccount(
 	account accounts.Account,
 	start time.Time,
 	end time.Time,
+	excludeTax bool,
 ) (*costexplorer.GetCostAndUsageOutput, error) {
 	dateFormat := dates.YMD
 
@@ -47,6 +59,9 @@ func CostsForAccount(
 	}
 	// call
 	sdkInput := costExplorerInput
+	if excludeTax {
+		sdkInput.Filter = costTaxFilter
+	}
 	sdkInput.TimePeriod = &costexplorer.DateInterval{
 		Start: aws.String(start.Format(dateFormat)),
 		End:   aws.String(end.Format(dateFormat)),
