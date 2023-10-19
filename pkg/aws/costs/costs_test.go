@@ -26,6 +26,10 @@ func TestCosts(t *testing.T) {
 		)
 
 		f, _ := os.CreateTemp(project.ROOT_DIR+"/files/", "*-test.csv")
-		ToCSV(r, accountList, f.Name())
+		rows, _ := ToCSVRows(r, accountList)
+		err := SaveCSVRowsToFile(rows, f.Name())
+		if err != nil {
+			t.Error("Failed to create csv file")
+		}
 	}
 }

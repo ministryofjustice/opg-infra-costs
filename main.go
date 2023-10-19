@@ -43,9 +43,12 @@ func main() {
 
 	now := time.Now().UTC()
 	start := time.Date(now.Year(), now.Month()-12, 1, 0, 0, 0, 0, now.Location())
-	end := time.Date(now.Year(), now.Month(), 1, 0, 0, 0, -1, now.Location())
+	// TimePeriod EndDate is exclusive see:
+	// https://docs.aws.amazon.com/aws-cost-management/latest/APIReference/API_GetCostAndUsage.html#awscostmanagement-GetCostAndUsage-request-TimePeriod
+	// so this needs to be first of the month
+	end := time.Date(now.Year(), now.Month(), 1, 0, 0, 0, 0, now.Location())
 
-	debugger.Log(fmt.Sprintf("Report for [%s]-[%s]", start.Format(dates.YM), end.Format(dates.YM)), debugger.INFO)()
+	debugger.Log(fmt.Sprintf("Report for [%s]-[%s]", start.Format(dates.YMD), end.Format(dates.YMD)), debugger.INFO)()
 
 	accountList, _ := accounts.Load(FILES["ACCOUNTS"])
 
@@ -56,9 +59,16 @@ func main() {
 		excludeTax(),
 	)
 
-	costs.ToCSV(costUsageData, accountList, FILES["CSV"])
+	rows, err := costs.ToCSVRows(costUsageData, accountList) //, FILES["CSV"])
+	if err != nil {
+		panic(err)
+	}
+	costs.SaveCSVRowsToFile(rows, FILES["CSV"])
+
 	raw := csv.ToMap(csv.Load(FILES["CSV"]))
-	sheets := report.Reports(start, end, raw, FILES["FX"])
+	// set the end date to be the previous complete month
+	sheetEnd := end.Add(time.Duration(-1) * time.Second)
+	sheets := report.Reports(start, sheetEnd, raw, FILES["FX"])
 
 	f := excelize.NewFile()
 	f.Path = FILES["XLSX"]

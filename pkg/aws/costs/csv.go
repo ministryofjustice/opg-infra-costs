@@ -14,14 +14,15 @@ import (
 
 var org string = "opg"
 
-func ToCSV(
+// ToCSV takes the raw map of GetCostAndUsageOutput and
+// converts to a slice of Row
+func ToCSVRows(
 	data map[string]*costexplorer.GetCostAndUsageOutput,
 	accountList []accounts.Account,
-	file string,
-) (err error) {
+) (rows []csv.Row, err error) {
 	defer debugger.Log("Wrote costs to CSV", debugger.DETAILED)()
 
-	rows := []csv.Row{}
+	rows = []csv.Row{}
 
 	for accountId, usage := range data {
 		account, _ := accounts.GetById(accountId, accountList)
@@ -52,11 +53,14 @@ func ToCSV(
 		}
 	}
 
+	return rows, nil
+}
+
+func SaveCSVRowsToFile(rows []csv.Row, file string) error {
 	f, _ := os.Create(file)
 	defer f.Close()
+	return gocsv.MarshalFile(&rows, f)
 
-	err = gocsv.MarshalFile(&rows, f)
-	return
 }
 
 func serviceNameCorrection(serviceName string) string {
